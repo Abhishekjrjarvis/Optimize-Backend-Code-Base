@@ -4,7 +4,7 @@ if (`${process.env.CONNECT_DB}` === "PROD") {
   var dburl = `${process.env.DB_URL}`; // Production
 } else if (`${process.env.CONNECT_DB}` === "DEV") {
   var dburl = `${process.env.DB_URL2}`; // Development
-} else {
+} else if(`${process.env.CONNECT_DB}` === "TEST") {
   var dburl = `${process.env.TESTING_DATABASE_URL}`; // Testing
 }
 
