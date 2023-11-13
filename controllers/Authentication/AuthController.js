@@ -37,7 +37,7 @@ const { file_to_aws } = require("../../Utilities/uploadFileAws");
 const Notification = require("../../models/notification");
 const Status = require("../../models/Admission/status");
 const invokeMemberTabNotification = require("../../Firebase/MemberTab");
-// const encryptionPayload = require("../../Utilities/Encrypt/payload");
+const encryptionPayload = require("../../Utilities/Encrypt/payload");
 const {
   random_password,
   filter_unique_username,
@@ -75,6 +75,8 @@ const FeeStructure = require("../../models/Finance/FeesStructure");
 const RemainingList = require("../../models/Admission/RemainingList");
 const Hostel = require("../../models/Hostel/hostel");
 const FinanceModerator = require("../../models/Moderator/FinanceModerator");
+const { universal_random_password } = require("../../Custom/universalId");
+const QvipleId = require("../../models/Universal/QvipleId");
 
 const generateQR = async (encodeData, Id) => {
   try {
@@ -129,7 +131,11 @@ exports.getRegisterIns = async (req, res) => {
       if (existInstitute) {
         res.send({ message: "Institute Existing with this Username" });
       } else {
+        const uqid = universal_random_password()
         const institute = new InstituteAdmin({ ...req.body });
+        var qvipleId = new QvipleId({})
+      qvipleId.institute = institute?._id
+      qvipleId.qviple_id = `${uqid}`
         institute.staffJoinCode = await randomSixCode();
         if (req.body.userId !== "") {
           const user = await User.findOne({ username: req.body.userId });
@@ -161,9 +167,9 @@ exports.getRegisterIns = async (req, res) => {
         }`;
         admins.instituteList.push(institute);
         admins.requestInstituteCount += 1;
-        await Promise.all([admins.save(), institute.save()]);
-        // const iEncrypt = await encryptionPayload(institute);
-        res.status(201).send({ message: "Institute", institute });
+        await Promise.all([admins.save(), institute.save(), qvipleId.save()]);
+        const iEncrypt = await encryptionPayload(institute);
+        res.status(201).send({ message: "Institute", institute: iEncrypt });
         const uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         });
@@ -225,8 +231,8 @@ exports.getPassIns = async (req, res) => {
         institute?._id,
         institute?.insPassword
       );
-      // const iPassEncrypt = await encryptionPayload(institute);
-      res.json({ token: `Bearer ${token}`, institute: institute, login: true });
+      const iPassEncrypt = await encryptionPayload(institute);
+      res.json({ token: `Bearer ${token}`, institute: iPassEncrypt, login: true });
     } else {
       res.send({ message: "Invalid Combination", login: false });
     }
@@ -375,7 +381,35 @@ const directESMSStaffQuery = (mob, valid_sname, valid_iname) => {
 
 exports.getOtpAtUser = async (req, res) => {
   try {
-    const { userPhoneNumber, status } = req.body;
+    const { userPhoneNumber, status, is_qid } = req.body;
+    if(is_qid){
+        if (status === "Not Verified") {
+          await OTPCode.deleteMany({ otp_qid: userPhoneNumber });
+          const qvipleId = await QvipleId.findOne({ qviple_id: `${userPhoneNumber}`})
+          const valid_user = await User.findById({ _id: `${qvipleId?.user}`})
+          if(valid_user?.userPhoneNumber){
+            var code = await generateOTP(valid_user?.userPhoneNumber);
+          }
+          else if(valid_user?.userEmail){
+            var code = await send_email_authentication(valid_user?.userEmail);
+          }
+          const otpCode = new OTPCode({
+            otp_qid: userPhoneNumber,
+            otp_code: `${code}`,
+          });
+          // console.log(code);
+          await otpCode.save();
+          const uPhoneEncrypt = await encryptionPayload(userPhoneNumber);
+          res.status(200).send({
+            message: "code will be send to entered Phone Number || Email",
+            userPhoneNumber: uPhoneEncrypt,
+            // code,
+          });
+        } else {
+          res.send({ message: "User will be verified..." });
+        }
+    }
+    else{
     const valid_phone = !userPhoneNumber?.includes("@")
       ? userPhoneNumber?.length === 10
         ? parseInt(userPhoneNumber)
@@ -396,10 +430,10 @@ exports.getOtpAtUser = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        // const uPhoneEncrypt = await encryptionPayload(valid_user);
+        const uPhoneEncrypt = await encryptionPayload(valid_user);
         res.status(200).send({
           message: "code will be send to registered mobile number",
-          userPhoneNumber,
+          userPhoneNumber: uPhoneEncrypt,
         });
       } else {
         res.send({ message: "User will be verified..." });
@@ -414,10 +448,10 @@ exports.getOtpAtUser = async (req, res) => {
         });
         // console.log(code);
         await otpCode.save();
-        // const uPhoneEncrypt = await encryptionPayload(userPhoneNumber);
+        const uPhoneEncrypt = await encryptionPayload(userPhoneNumber);
         res.status(200).send({
           message: "code will be send to entered Email",
-          userPhoneNumber,
+          userPhoneNumber: uPhoneEncrypt,
           // code,
         });
       } else {
@@ -426,6 +460,7 @@ exports.getOtpAtUser = async (req, res) => {
     } else {
       res.send({ message: "Invalid Phone No." });
     }
+  }
   } catch (e) {
     console.log(`Error`, e);
   }
@@ -465,10 +500,10 @@ exports.getOtpAtIns = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        // const iPhoneEncrypt = await encryptionPayload(valid_ins);
+        const iPhoneEncrypt = await encryptionPayload(valid_ins);
         res.status(200).send({
           message: "code will be send to registered mobile number",
-          insPhoneNumber,
+          insPhoneNumber: iPhoneEncrypt,
         });
       } else {
         res.send({ message: "Institute Phone Number will be verified..." });
@@ -487,6 +522,7 @@ exports.verifyOtpByUser = async (req, res) => {
     const { id } = req.params;
     const valid_otp = await OTPCode.findOne({ otp_number: `${id}` });
     const valid_otp_email = await OTPCode.findOne({ otp_email: `${id}` });
+    const valid_otp_qviple = await OTPCode.findOne({ otp_qid: `${id}` });
     if (valid_otp) {
       var all_account = await User.find({ userPhoneNumber: id }).select(
         "userLegalName username profilePhoto userPassword"
@@ -525,13 +561,31 @@ exports.verifyOtpByUser = async (req, res) => {
           });
         }
       }
-    } else {
+    } else if (valid_otp_qviple) {
+      const qvipleId = await QvipleId.findOne({ qviple_id: `${valid_otp_qviple?.otp_qid}`})
+      var all_account_qviple = await User.findById({
+        _id: `${qvipleId?.user}`,
+      }).select("userLegalName username profilePhoto userPassword");
+      const token = generateAccessToken(
+        all_account_qviple?.username,
+        all_account_qviple?._id,
+        all_account_qviple?.userPassword
+      );
+      account_linked.push({
+        user: all_account_qviple,
+        login: true,
+        token: `Bearer ${token}`,
+      });
+    }
+    else {
     }
     if (
       (req.body.userOtpCode &&
         req.body.userOtpCode === `${valid_otp?.otp_code}`) ||
       (req.body.userOtpCode &&
-        req.body.userOtpCode === `${valid_otp_email?.otp_code}`)
+        req.body.userOtpCode === `${valid_otp_email?.otp_code}`) ||
+        (req.body.userOtpCode &&
+          req.body.userOtpCode === `${valid_otp_qviple?.otp_code}`)
     ) {
       var userStatus = "approved";
       // Add Another Encryption
@@ -547,7 +601,11 @@ exports.verifyOtpByUser = async (req, res) => {
         await OTPCode.findByIdAndDelete(valid_otp?._id);
       } else if (valid_otp_email) {
         await OTPCode.findByIdAndDelete(valid_otp_email?._id);
-      } else {
+      }
+      else if (valid_otp_qviple) {
+        await OTPCode.findByIdAndDelete(valid_otp_qviple?._id);
+      }
+      else {
       }
     } else {
       res.status(200).send({
@@ -628,6 +686,7 @@ exports.profileByUser = async (req, res) => {
         if (!valid_phone) {
           var valid_email = id?.includes("@") ? id : false;
         }
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: userLegalName,
           userGender: userGender,
@@ -641,6 +700,9 @@ exports.profileByUser = async (req, res) => {
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+        qvipleId.user = user?._id
+        qvipleId.qviple_id = `${uqid}`
         if (req.file) {
           var width = 200;
           var height = 200;
@@ -652,15 +714,15 @@ exports.profileByUser = async (req, res) => {
         }
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         if (req.file) {
           await unlinkFile(req.file.path);
         }
         const token = generateAccessToken(user?.username, user?._id);
-        // const uLoginEncrypt = await encryptionPayload(user);
+        const uLoginEncrypt = await encryptionPayload(user);
         res.status(200).send({
           message: "Profile Successfully Created...",
-          user,
+          user: uLoginEncrypt,
           token: `Bearer ${token}`,
         });
         var uInstitute = await InstituteAdmin.findOne({
@@ -738,6 +800,7 @@ exports.profileByGoogle = async (req, res) => {
       pic_url,
     } = req.body;
     const admins = await Admin.findById({ _id: `${process.env.S_ADMIN_ID}` });
+    const uqid = universal_random_password()
     const user = new User({
       userLegalName: userLegalName,
       userGender: userGender,
@@ -751,9 +814,12 @@ exports.profileByGoogle = async (req, res) => {
       createdAt: c_date,
       remindLater: rDate,
     });
+    var qvipleId = new QvipleId({})
+        qvipleId.user = user?._id
+        qvipleId.qviple_id = `${uqid}`
     admins.users.push(user);
     admins.userCount += 1;
-    await Promise.all([admins.save(), user.save()]);
+    await Promise.all([admins.save(), user.save(), qvipleId.save()]);
     const token = generateAccessToken(user?.username, user?._id);
     res.status(200).send({
       message: "Profile Successfully Created...",
@@ -794,8 +860,8 @@ exports.getUserPassword = async (req, res) => {
           user?._id,
           user?.userPassword
         );
-        // const uPassEncrypt = await encryptionPayload(user);
-        res.json({ token: `Bearer ${token}`, user: user, login: true });
+        const uPassEncrypt = await encryptionPayload(user);
+        res.json({ token: `Bearer ${token}`, user: uPassEncrypt, login: true });
       } else {
         res.send({ message: "Invalid Password Combination", login: false });
       }
@@ -821,10 +887,10 @@ exports.forgotPasswordSendOtp = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        // const fEncrypt = await encryptionPayload(user);
+        const fEncrypt = await encryptionPayload(user);
         res.status(200).send({
           message: "code will be send to registered mobile number",
-          user,
+          user: fEncrypt,
         });
       } else if (user?.userEmail) {
         await OTPCode.deleteMany({ otp_email: user?.userEmail });
@@ -834,10 +900,10 @@ exports.forgotPasswordSendOtp = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        // const fEncrypt = await encryptionPayload(user);
+        const fEncrypt = await encryptionPayload(user);
         res.status(200).send({
           message: "code will be send to registered email",
-          user,
+          user: fEncrypt,
         });
       } else {
       }
@@ -849,10 +915,10 @@ exports.forgotPasswordSendOtp = async (req, res) => {
         otp_code: `${code}`,
       });
       await otpCode.save();
-      // const fEncrypt = await encryptionPayload(institute);
+      const fEncrypt = await encryptionPayload(institute);
       res.status(200).send({
         message: "code will be send to registered mobile number",
-        institute,
+        institute: fEncrypt,
       });
     } else {
       res.status(200).send({ message: "Invalid Username" });
@@ -875,8 +941,8 @@ exports.forgotPasswordVerifyOtp = async (req, res) => {
         req.body.userOtpCode &&
         req.body.userOtpCode === `${valid_otp_user?.otp_code}`
       ) {
-        // const oEncrypt = await encryptionPayload(user);
-        res.status(200).send({ message: "Otp verified", user, access: true });
+        const oEncrypt = await encryptionPayload(user);
+        res.status(200).send({ message: "Otp verified", user: oEncrypt, access: true });
         await OTPCode.findByIdAndDelete(valid_otp_user?._id);
       } else {
         res.status(200).send({ message: "Invalid OTP", access: false });
@@ -889,10 +955,10 @@ exports.forgotPasswordVerifyOtp = async (req, res) => {
         req.body.userOtpCode &&
         req.body.userOtpCode === `${valid_otp_ins?.otp_code}`
       ) {
-        // const oEncrypt = await encryptionPayload(institute);
+        const oEncrypt = await encryptionPayload(institute);
         res
           .status(200)
-          .send({ message: "Otp verified", institute, access: true });
+          .send({ message: "Otp verified", institute: oEncrypt, access: true });
         await OTPCode.findByIdAndDelete(valid_otp_ins?._id);
       } else {
         res.status(200).send({ message: "Invalid OTP", access: false });
@@ -916,10 +982,10 @@ exports.getNewPassword = async (req, res) => {
       if (userPassword === userRePassword) {
         user.userPassword = hashUserPass;
         await user.save();
-        // const nEncrypt = await encryptionPayload(user);
+        const nEncrypt = await encryptionPayload(user);
         res
           .status(200)
-          .send({ message: "Password Changed Successfully", user });
+          .send({ message: "Password Changed Successfully", user: nEncrypt });
       } else {
         res.status(200).send({ message: "Invalid Password Combination" });
       }
@@ -927,10 +993,10 @@ exports.getNewPassword = async (req, res) => {
       if (userPassword === userRePassword) {
         institute.insPassword = hashUserPass;
         await institute.save();
-        // const nEncrypt = await encryptionPayload(institute);
+        const nEncrypt = await encryptionPayload(institute);
         res
           .status(200)
-          .send({ message: "Password Changed Successfully", institute });
+          .send({ message: "Password Changed Successfully", institute: nEncrypt });
       } else {
         res.status(200).send({ message: "Invalid Password Combination" });
       }
@@ -1022,10 +1088,10 @@ module.exports.authentication = async (req, res) => {
             institute?._id,
             institute?.insPassword
           );
-          // const loginEncrypt = await encryptionPayload(institute);
+          const loginEncrypt = await encryptionPayload(institute);
           res.json({
             token: `Bearer ${token}`,
-            institute: institute,
+            institute: institute || loginEncrypt,
             login: true,
             main_role: checkUserSocialPass
               ? "SOCIAL_MEDIA_HANDLER"
@@ -1042,10 +1108,10 @@ module.exports.authentication = async (req, res) => {
             institute?._id,
             institute?.insPassword
           );
-          // const loginEncrypt = await encryptionPayload(institute);
+          const loginEncrypt = await encryptionPayload(institute);
           res.json({
             token: `Bearer ${token}`,
-            institute: institute,
+            institute: institute || loginEncrypt,
             login: true,
             main_role: checkUserSocialPass
               ? "SOCIAL_MEDIA_HANDLER"
@@ -1069,8 +1135,8 @@ module.exports.authentication = async (req, res) => {
           admin?._id,
           admin?.userPassword
         );
-        // const loginEncrypt = await encryptionPayload(admin);
-        res.json({ token: `Bearer ${token}`, admin: admin, login: true });
+        const loginEncrypt = await encryptionPayload(admin);
+        res.json({ token: `Bearer ${token}`, admin: admin || loginEncrypt, login: true });
       } else {
         res.send({ message: "Invalid Credentials", login: false });
       }
@@ -1094,10 +1160,10 @@ module.exports.authentication = async (req, res) => {
               user?._id,
               user?.userPassword
             );
-            // const loginEncrypt = await encryptionPayload(user);
+            const loginEncrypt = await encryptionPayload(user);
             res.json({
               token: `Bearer ${token}`,
-              user: user,
+              user: user || loginEncrypt,
               login: true,
             });
           } else if (user.activeStatus === "Activated") {
@@ -1106,10 +1172,10 @@ module.exports.authentication = async (req, res) => {
               user?._id,
               user?.userPassword
             );
-            // const loginEncrypt = await encryptionPayload(user);
+            const loginEncrypt = await encryptionPayload(user);
             res.json({
               token: `Bearer ${token}`,
-              user: user,
+              user: user || loginEncrypt,
               login: true,
               is_developer: user?.is_developer,
             });
@@ -1342,18 +1408,18 @@ exports.searchByUsernameQuery = async (req, res) => {
         .exec();
 
       if (one_ins) {
-        // const insEncrypt = await encryptionPayload(one_ins);
+        const insEncrypt = await encryptionPayload(one_ins);
         res.status(202).send({
           message: "Username already exists 🙄",
           seen: true,
-          username: one_ins,
+          username: insEncrypt,
         });
       } else if (one_user) {
-        // const userEncrypt = await encryptionPayload(one_user);
+        const userEncrypt = await encryptionPayload(one_user);
         res.status(202).send({
           message: "Username already exists 🙄",
           seen: true,
-          username: one_user,
+          username: userEncrypt,
         });
       } else {
         res.status(200).send({
@@ -1447,6 +1513,7 @@ exports.retrieveDirectJoinQuery = async (req, res) => {
     if (!valid?.exist) {
       const genUserPass = bcrypt.genSaltSync(12);
       const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
       var user = new User({
         userLegalName: `${req.body.studentFirstName} ${
           req.body.studentMiddleName ? req.body.studentMiddleName : ""
@@ -1463,9 +1530,12 @@ exports.retrieveDirectJoinQuery = async (req, res) => {
         remindLater: rDate,
         next_date: c_date,
       });
+      var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
       admins.users.push(user);
       admins.userCount += 1;
-      await Promise.all([admins.save(), user.save()]);
+      await Promise.all([admins.save(), user.save(), qvipleId.save()]);
       var uInstitute = await InstituteAdmin.findOne({
         isUniversal: "Universal",
       })
@@ -1666,6 +1736,7 @@ exports.retrieveDirectJoinStaffQuery = async (req, res) => {
     if (!valid?.exist) {
       const genUserPass = bcrypt.genSaltSync(12);
       const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
       var user = new User({
         userLegalName: `${req.body.staffFirstName} ${
           req.body.staffMiddleName ? req.body.staffMiddleName : ""
@@ -1682,9 +1753,12 @@ exports.retrieveDirectJoinStaffQuery = async (req, res) => {
         remindLater: rDate,
         next_date: c_date,
       });
+      var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
       admins.users.push(user);
       admins.userCount += 1;
-      await Promise.all([admins.save(), user.save()]);
+      await Promise.all([admins.save(), user.save(), qvipleId.save()]);
       var uInstitute = await InstituteAdmin.findOne({
         isUniversal: "Universal",
       })
@@ -1849,6 +1923,7 @@ exports.retrieveDirectJoinAdmissionQuery = async (req, res) => {
     if (!valid?.exist) {
       const genUserPass = bcrypt.genSaltSync(12);
       const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
       var user = new User({
         userLegalName: `${req.body.studentFirstName} ${
           req.body.studentMiddleName ? req.body.studentMiddleName : ""
@@ -1865,9 +1940,12 @@ exports.retrieveDirectJoinAdmissionQuery = async (req, res) => {
         remindLater: rDate,
         next_date: c_date,
       });
+      var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
       admins.users.push(user);
       admins.userCount += 1;
-      await Promise.all([admins.save(), user.save()]);
+      await Promise.all([admins.save(), user.save(), qvipleId.save()]);
       var uInstitute = await InstituteAdmin.findOne({
         isUniversal: "Universal",
       })
@@ -2069,6 +2147,7 @@ exports.retrieveDirectJoinHostelQuery = async (req, res) => {
     if (!valid?.exist) {
       const genUserPass = bcrypt.genSaltSync(12);
       const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
       var user = new User({
         userLegalName: `${req.body.studentFirstName} ${
           req.body.studentMiddleName ? req.body.studentMiddleName : ""
@@ -2085,9 +2164,12 @@ exports.retrieveDirectJoinHostelQuery = async (req, res) => {
         remindLater: rDate,
         next_date: c_date,
       });
+      var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
       admins.users.push(user);
       admins.userCount += 1;
-      await Promise.all([admins.save(), user.save()]);
+      await Promise.all([admins.save(), user.save(), qvipleId.save()]);
       var uInstitute = await InstituteAdmin.findOne({
         isUniversal: "Universal",
       })
@@ -2296,6 +2378,7 @@ exports.retrieveInstituteDirectJoinQuery = async (req, res) => {
       if (!valid?.exist) {
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${req.body.studentFirstName} ${
             req.body.studentMiddleName ? req.body.studentMiddleName : ""
@@ -2312,9 +2395,12 @@ exports.retrieveInstituteDirectJoinQuery = async (req, res) => {
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         var uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         })
@@ -2641,6 +2727,7 @@ exports.retrieveInstituteDirectJoinStaffQuery = async (req, res) => {
       if (!valid?.exist) {
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${req.body.staffFirstName} ${
             req.body.staffMiddleName ? req.body.staffMiddleName : ""
@@ -2657,9 +2744,12 @@ exports.retrieveInstituteDirectJoinStaffQuery = async (req, res) => {
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         var uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         })
@@ -2925,6 +3015,7 @@ exports.renderDirectAppJoinConfirmQuery = async (req, res) => {
       if (!valid?.exist) {
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${req.body.studentFirstName} ${
             req.body.studentMiddleName ? req.body.studentMiddleName : ""
@@ -2941,9 +3032,12 @@ exports.renderDirectAppJoinConfirmQuery = async (req, res) => {
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         await universal_account_creation_feed(user);
         await user_date_of_birth(user);
       } else {
@@ -3144,6 +3238,7 @@ exports.retrieveInstituteDirectJoinQueryPayload = async (
       if (!valid?.exist) {
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${query.studentFirstName} ${
             query.studentMiddleName ? query.studentMiddleName : ""
@@ -3162,9 +3257,12 @@ exports.retrieveInstituteDirectJoinQueryPayload = async (
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qviple.save()]);
         var uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         })
@@ -3673,6 +3771,7 @@ exports.retrieveInstituteDirectJoinStaffAutoQuery = async (
       if (!valid?.exist) {
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${ref?.staffFirstName} ${
             ref?.staffMiddleName ? ref?.staffMiddleName : ""
@@ -3689,9 +3788,12 @@ exports.retrieveInstituteDirectJoinStaffAutoQuery = async (
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         var uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         })
@@ -4186,6 +4288,7 @@ exports.retrieveUnApprovedDirectJoinQuery = async (id, student_array) => {
       if (!valid?.exist) {
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${ref?.studentFirstName} ${
             ref?.studentMiddleName ? ref?.studentMiddleName : ""
@@ -4202,9 +4305,12 @@ exports.retrieveUnApprovedDirectJoinQuery = async (id, student_array) => {
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         var uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         })

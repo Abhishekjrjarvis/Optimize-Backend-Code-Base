@@ -73,7 +73,7 @@ router.use("/api/v1/admin", adminNew);
 router.use("/api/v1/ins", instituteNew);
 router.use("/api/v1/ins/post", institutePostRoute);
 router.use("/api/v1/admin/post", superAdminPostRoute);
-router.use("/api/v1/auth", authNew);
+router.use("/api/v2/auth", authNew);
 router.use("/api/v1/finance", financeNew);
 router.use("/api/v1/sport/arts", sportNew);
 router.use("/api/v1/all", miscellaneousNew);

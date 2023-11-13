@@ -14,6 +14,9 @@ const otpCodeSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  otp_qid: {
+    type: String
+  }
 });
 
 module.exports = mongoose.model("OTPCode", otpCodeSchema);

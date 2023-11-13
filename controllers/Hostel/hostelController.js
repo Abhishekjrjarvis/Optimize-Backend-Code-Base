@@ -96,6 +96,8 @@ const {
   insert_multiple_hostel_status,
 } = require("../../helper/hostelMultipleStatus");
 const FeeMaster = require("../../models/Finance/FeeMaster");
+const { universal_random_password } = require("../../Custom/universalId");
+const QvipleId = require("../../models/Universal/QvipleId");
 
 exports.renderActivateHostelQuery = async (req, res) => {
   try {
@@ -6640,6 +6642,7 @@ exports.renderDirectHostelJoinConfirmQuery = async (req, res) => {
       if (!valid?.exist) {
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${req.body.studentFirstName} ${
             req.body.studentMiddleName ? req.body.studentMiddleName : ""
@@ -6655,9 +6658,12 @@ exports.renderDirectHostelJoinConfirmQuery = async (req, res) => {
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         await universal_account_creation_feed(user);
         await user_date_of_birth(user);
       } else {
@@ -6867,6 +6873,7 @@ exports.renderDirectHostelJoinExcelQuery = async (hid, student_array) => {
         );
         const genUserPass = bcrypt.genSaltSync(12);
         const hashUserPass = bcrypt.hashSync(valid?.password, genUserPass);
+      const uqid = universal_random_password()
         var user = new User({
           userLegalName: `${ref?.studentFirstName} ${
             ref?.studentMiddleName ? ref?.studentMiddleName : ""
@@ -6883,9 +6890,12 @@ exports.renderDirectHostelJoinExcelQuery = async (hid, student_array) => {
           remindLater: rDate,
           next_date: c_date,
         });
+        var qvipleId = new QvipleId({})
+      qvipleId.user = user?._id
+      qvipleId.qviple_id = `${uqid}`
         admins.users.push(user);
         admins.userCount += 1;
-        await Promise.all([admins.save(), user.save()]);
+        await Promise.all([admins.save(), user.save(), qvipleId.save()]);
         await universal_account_creation_feed(user);
         await user_date_of_birth(user);
       }
