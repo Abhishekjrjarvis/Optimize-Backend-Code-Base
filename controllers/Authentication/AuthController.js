@@ -1091,7 +1091,7 @@ module.exports.authentication = async (req, res) => {
           const loginEncrypt = await encryptionPayload(institute);
           res.json({
             token: `Bearer ${token}`,
-            institute: institute || loginEncrypt,
+            institute: loginEncrypt,
             login: true,
             main_role: checkUserSocialPass
               ? "SOCIAL_MEDIA_HANDLER"
@@ -1111,7 +1111,7 @@ module.exports.authentication = async (req, res) => {
           const loginEncrypt = await encryptionPayload(institute);
           res.json({
             token: `Bearer ${token}`,
-            institute: institute || loginEncrypt,
+            institute: loginEncrypt,
             login: true,
             main_role: checkUserSocialPass
               ? "SOCIAL_MEDIA_HANDLER"
@@ -1136,7 +1136,7 @@ module.exports.authentication = async (req, res) => {
           admin?.userPassword
         );
         const loginEncrypt = await encryptionPayload(admin);
-        res.json({ token: `Bearer ${token}`, admin: admin || loginEncrypt, login: true });
+        res.json({ token: `Bearer ${token}`, admin: loginEncrypt, login: true });
       } else {
         res.send({ message: "Invalid Credentials", login: false });
       }
@@ -1163,7 +1163,7 @@ module.exports.authentication = async (req, res) => {
             const loginEncrypt = await encryptionPayload(user);
             res.json({
               token: `Bearer ${token}`,
-              user: user || loginEncrypt,
+              user: loginEncrypt,
               login: true,
             });
           } else if (user.activeStatus === "Activated") {
@@ -1175,7 +1175,7 @@ module.exports.authentication = async (req, res) => {
             const loginEncrypt = await encryptionPayload(user);
             res.json({
               token: `Bearer ${token}`,
-              user: user || loginEncrypt,
+              user: loginEncrypt,
               login: true,
               is_developer: user?.is_developer,
             });
