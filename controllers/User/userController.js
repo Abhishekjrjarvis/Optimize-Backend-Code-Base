@@ -33,7 +33,7 @@ const { dateTimeSort } = require("../../Utilities/timeComparison");
 const { shuffleArray } = require("../../Utilities/Shuffle");
 const { valid_student_form_query } = require("../../Functions/validForm");
 const { handle_undefined } = require("../../Handler/customError");
-// const encryptionPayload = require("../../Utilities/Encrypt/payload");
+const encryptionPayload = require("../../Utilities/Encrypt/payload");
 
 exports.retrieveProfileData = async (req, res) => {
   try {
@@ -1903,7 +1903,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         .lean()
         .exec();
     }
-    // const staffEncrypt = await encryptionPayload(staff);
+    const staffEncrypt = await encryptionPayload(staff);
     // const cached = await connect_redis_miss(
     //   `Staff-Designation-Member-${sid}`,
     //   staff
@@ -1911,7 +1911,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
     res.status(200).send({
       message: "All Staff Designation Feed from DB 🙌",
       // staff: cached.staff,
-      staff: staff,
+      staff: staffEncrypt,
     });
   } catch (e) {
     console.log(e);
