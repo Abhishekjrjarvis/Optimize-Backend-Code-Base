@@ -1105,8 +1105,12 @@ exports.retrieveRemainFeeBalance = async (req, res) => {
     student.forEach((stu) => {
       remain += stu.studentRemainingFeeCount;
     });
+    const remain_bind = {
+      message: "Remaining Balance", 
+      remain: remain
+    }
     const remainEncrypt = await encryptionPayload(remain);
-    res.status(200).send({ message: "Remaining Balance", remain: remainEncrypt });
+    res.status(200).send(remainEncrypt);
   } catch (e) {
     // console.log(e)
   }
@@ -1175,8 +1179,12 @@ exports.allEmpToFinance = async (req, res) => {
         select:
           "staffFirstName staffMiddleName staffLastName staffROLLNO staffProfilePhoto photoId",
       });
-    const empEncrypt = await encryptionPayload(allEmp);
-    res.status(200).send({ message: "All Employee List", allEmp: empEncrypt });
+    const staff_bind = {
+      message: "All Employee List", 
+      allEmp: allEmp
+    }
+    const empEncrypt = await encryptionPayload(staff_bind);
+    res.status(200).send(empEncrypt);
   } catch (e) {
     console.log(e);
   }
@@ -1524,12 +1532,21 @@ exports.retrieveRemainFeeList = async (req, res) => {
     }
     // const sEncrypt = await encryptionPayload(student);
     if (sorted_zero?.length > 0) {
-      const sEncrypt = await encryptionPayload(sorted_zero);
+      const fee_bind = {
+        message: "Remaining Fee List", 
+        list: sorted_zero
+      }
+      const sEncrypt = await encryptionPayload(fee_bind);
       res
         .status(200)
-        .send({ message: "Remaining Fee List", list: sEncrypt });
+        .send(sEncrypt);
     } else {
-      res.status(200).send({ message: "No Remaining Fee List", list: [] });
+      const fee_bind = {
+        message: "No Remaining Fee List", 
+        list: []
+      }
+      const sEncrypt = await encryptionPayload(fee_bind);
+      res.status(200).send(sEncrypt);
     }
   } catch (e) {
     console.log(e);
@@ -1543,8 +1560,12 @@ exports.retrieveOneIncomeQuery = async (req, res) => {
       path: "incomeFromUser",
       select: "username userLegalName photoId profilePhoto",
     });
-    const iOneEncrypt = await encryptionPayload(i_detail);
-    res.status(200).send({ message: "One Income Detail", oneIncome: iOneEncrypt });
+    const income_bind = {
+      message: "One Income Detail", 
+      oneIncome: i_detail
+    }
+    const iOneEncrypt = await encryptionPayload(income_bind);
+    res.status(200).send(iOneEncrypt);
   } catch {}
 };
 
@@ -1555,10 +1576,14 @@ exports.retrieveOneExpenseQuery = async (req, res) => {
       path: "expensePaidUser",
       select: "username userLegalName photoId profilePhoto",
     });
-    const eOneEncrypt = await encryptionPayload(e_detail);
+    const expense_bind = {
+      message: "One Expense Detail", 
+      oneExpense: e_detail
+    }
+    const eOneEncrypt = await encryptionPayload(expense_bind);
     res
       .status(200)
-      .send({ message: "One Expense Detail", oneExpense: eOneEncrypt });
+      .send(eOneEncrypt);
   } catch {}
 };
 
@@ -1576,10 +1601,14 @@ exports.retrieveAllStaffArray = async (req, res) => {
       })
       .lean()
       .exec();
-    const staffEncrypt = await encryptionPayload(ins?.ApproveStaff);
+      const all_bind = {
+        message: "All Staff List", 
+        staff_array: ins?.ApproveStaff
+      }
+    const staffEncrypt = await encryptionPayload(all_bind);
     res
       .status(200)
-      .send({ message: "All Staff List", staff_array: staffEncrypt });
+      .send(staffEncrypt);
   } catch {}
 };
 
@@ -2582,18 +2611,21 @@ exports.renderFinanceAllBankAccountQuery = async (req, res) => {
     }
 
     if (all_accounts?.length > 0) {
-      const all_bank_encrypt = await encryptionPayload(all_accounts)
-      res.status(200).send({
+      const account_bind = {
         message: "Lot's of Bank Account's Available 👍",
         access: true,
-        all_accounts: all_bank_encrypt,
-      });
+        all_accounts: all_accounts,
+      }
+      const all_bank_encrypt = await encryptionPayload(account_bind)
+      res.status(200).send(all_bank_encrypt);
     } else {
-      res.status(200).send({
+      const account_bind = {
         message: "No Bank Account's Available 👍",
         access: true,
         all_accounts: [],
-      });
+      }
+      const all_bank_encrypt = await encryptionPayload(account_bind)
+      res.status(200).send(all_bank_encrypt);
     }
   } catch (e) {
     console.log(e);
@@ -2630,12 +2662,13 @@ exports.renderFinanceOneBankQuery = async (req, res) => {
         select: "_id",
       });
 
-      const one_bank_encrypt = await encryptionPayload(one_bank)
-    res.status(200).send({
-      message: "Explore One Bank Account Query",
-      access: true,
-      one_bank: one_bank_encrypt,
-    });
+      const account_bind = {
+        message: "Explore One Bank Account Query",
+        access: true,
+        one_bank: one_bank,
+      }
+      const one_bank_encrypt = await encryptionPayload(account_bind)
+    res.status(200).send(one_bank_encrypt);
   } catch (e) {
     console.log(e);
   }
@@ -2721,11 +2754,11 @@ exports.renderFinanceAllFeeCategoryQuery = async (req, res) => {
       });
 
     if (all_fees_format?.length > 0) {
-      const all_fees_format_encrypt = await encryptionPayload(all_fees_format)
+      // const all_fees_format_encrypt = await encryptionPayload(all_fees_format)
       res.status(200).send({
         message: "Lot's of Fees Category Available 👍",
         access: true,
-        all_fees_format: all_fees_format_encrypt,
+        all_fees_format: all_fees_format,
       });
     } else {
       res.status(200).send({
@@ -3313,11 +3346,11 @@ exports.renderDepartmentAllFeeStructure = async (req, res) => {
         });
     }
     if (all_structures?.length > 0) {
-      const all_structures_encrypt = await encryptionPayload(all_structures)
+      // const all_structures_encrypt = await encryptionPayload(all_structures)
       res.status(200).send({
         message: "Lot's of Fees Structures Available 👍",
         access: true,
-        all_structures: all_structures_encrypt,
+        all_structures: all_structures,
       });
     } else {
       res.status(200).send({
@@ -3434,11 +3467,11 @@ exports.renderAllFinanceExempt = async (req, res) => {
         });
     }
     if (all_exempt?.length > 0) {
-      const all_exempt_encrypt = await encryptionPayload(all_exempt)
+      // const all_exempt_encrypt = await encryptionPayload(all_exempt)
       res.status(200).send({
         message: "Lot's of Exempted Volume Receipts",
         access: true,
-        all_exempt: all_exempt_encrypt,
+        all_exempt: all_exempt,
         all_exempt_count: finance?.financeExemptBalance,
       });
     } else {
@@ -3557,7 +3590,7 @@ exports.renderAllFinanceGovernment = async (req, res) => {
         });
     }
     if (all_exempt?.length > 0) {
-      const all_exempt_encrypt = await encryptionPayload(all_exempt)
+      // const all_exempt_encrypt = await encryptionPayload(all_exempt)
       res.status(200).send({
         message: "Lot's of Government / Scholarships Volume Receipts",
         access: true,
@@ -3771,17 +3804,15 @@ exports.renderOneFeeReceipt = async (req, res) => {
     receipt.student.active_fee_heads = [...new_format];
 
     const obj = {
+      message: "Come up with Tea and Snacks",
+      access: true,
       receipt: receipt,
       one_account: one_account,
       all_remain: all_remain
     }
     const all_encrypt = await encryptionPayload(obj)
 
-    res.status(200).send({
-      message: "Come up with Tea and Snacks",
-      access: true,
-      ...all_encrypt,
-    });
+    res.status(200).send(all_encrypt);
   } catch (e) {
     console.log(e);
   }
@@ -3912,16 +3943,14 @@ exports.renderOneTransportFeeReceipt = async (req, res) => {
     receipt.student.active_fee_heads = [...new_format];
 
     const obj = {
+      message: "Come up with Tea and Snacks",
+      access: true,
       receipt: receipt,
       one_account: one_account,
       all_remain: all_remain
     }
     const all_encrypt = await encryptionPayload(obj)
-    res.status(200).send({
-      message: "Come up with Tea and Snacks",
-      access: true,
-      ...all_encrypt
-    });
+    res.status(200).send(all_encrypt);
   } catch (e) {
     console.log(e);
   }
@@ -3953,11 +3982,11 @@ exports.renderOneFeeStructure = async (req, res) => {
         select: "batchName batchStatus createdAt",
       });
 
-      const structure_encrypt = await encryptionPayload(structure)
+      // const structure_encrypt = await encryptionPayload(structure)
     
     res
       .status(200)
-      .send({ message: "Explore One Fees Structure", access: true, structure: structure_encrypt });
+      .send({ message: "Explore One Fees Structure", access: true, structure: structure });
   } catch (e) {
     console.log(e);
   }
@@ -4023,15 +4052,13 @@ exports.renderFinanceAllBankDetails = async (req, res) => {
       var all_account = null;
     }
     const obj = {
+      message: "Explore Transaction Query",
+      access: true,
       bank_query: bank_query?.payment_modes_type,
       all_account: all_account
     }
     const query_encrypt = await encryptionPayload(obj)
-    res.status(200).send({
-      message: "Explore Transaction Query",
-      access: true,
-      ...query_encrypt,
-    });
+    res.status(200).send(query_encrypt);
   } catch (e) {
     console.log(e);
   }
@@ -4178,11 +4205,11 @@ exports.renderFinanceAllMasterHeadQuery = async (req, res) => {
     }
 
     if (all_master?.length > 0) {
-      const all_master_encrypt = await encryptionPayload(all_master)
+      // const all_master_encrypt = await encryptionPayload(all_master)
       res.status(200).send({
         message: "Explore All Master Heads",
         access: true,
-        all_master: all_master_encrypt,
+        all_master: all_master,
       });
     } else {
       res.status(200).send({
@@ -4262,15 +4289,15 @@ exports.renderAllExportExcelArrayQuery = async (req, res) => {
       ins_admin?.export_collection.reverse()
     );
     if (all_excel?.length > 0) {
-      const obj_excel = {
-        all_excel: all_excel,
-        count: ins_admin?.export_collection?.length
-      }
-      const all_excel_encrypt = await encryptionPayload(obj_excel)
+      // const obj_excel = {
+        
+      // }
+      // const all_excel_encrypt = await encryptionPayload(obj_excel)
       res.status(200).send({
         message: "Explore All Exported Excel",
         access: true,
-        ...all_excel_encrypt,
+        all_excel: all_excel,
+        count: ins_admin?.export_collection?.length
       });
     } else {
       res.status(200).send({
@@ -4356,11 +4383,11 @@ exports.renderFinanceMasterDepositQuery = async (req, res) => {
       "paid_student_count deposit_amount master_name refund_student_count refund_amount"
     );
 
-    const master_encrypt = await encryptionPayload(master)
+    // const master_encrypt = await encryptionPayload(master)
     res.status(200).send({
       message: "Explore Linked Fee Masters",
       access: true,
-      master: master_encrypt,
+      master: master,
     });
   } catch (e) {
     console.log(e);
@@ -4421,11 +4448,11 @@ exports.renderFinanceMasterAllDepositArray = async (req, res) => {
     });
 
     if (all_students?.length > 0) {
-    const students_encrypt = await encryptionPayload(all_students)
+    // const students_encrypt = await encryptionPayload(all_students)
       res.status(200).send({
         message: "Explore Student Deposits Available",
         access: true,
-        all_students: students_encrypt,
+        all_students: all_students,
       });
     } else {
       res.status(200).send({
@@ -4600,11 +4627,11 @@ exports.renderFinanceMasterAllDepositHistory = async (req, res) => {
         });
     }
     if (all_receipts?.length > 0) {
-    const receipt_encrypt = await encryptionPayload(all_receipts)
+    // const receipt_encrypt = await encryptionPayload(all_receipts)
       res.status(200).send({
         message: "Explore All Refund History",
         access: true,
-        all_receipts: receipt_encrypt,
+        all_receipts: all_receipts,
       });
     } else {
       res.status(200).send({
@@ -4694,11 +4721,11 @@ exports.renderFinanceAllPayrollMasterQuery = async (req, res) => {
     }
 
     if (all_masters?.length > 0) {
-    const master_encrypt = await encryptionPayload(all_masters)
+    // const master_encrypt = await encryptionPayload(all_masters)
       res.status(200).send({
         message: "Explore All Payroll Master Query ",
         access: true,
-        all_masters: master_encrypt,
+        all_masters: all_masters,
       });
     } else {
       res.status(200).send({
@@ -4743,11 +4770,11 @@ exports.renderFinanceOnePayrollMasterAllMonthQuery = async (req, res) => {
       });
 
     if (all_month_wise?.length > 0) {
-    const month_encrypt = await encryptionPayload(all_month_wise)
+    // const month_encrypt = await encryptionPayload(all_month_wise)
       res.status(200).send({
         message: "Explore All Months Payroll Master",
         access: true,
-        all_month_wise: month_encrypt,
+        all_month_wise: all_month_wise,
       });
     } else {
       res.status(200).send({
@@ -4794,11 +4821,11 @@ exports.renderFinanceOnePayrollMasterOneMonthAllEmpQuery = async (req, res) => {
     );
 
     if (all_emp?.length > 0) {
-    const emp_encrypt = await encryptionPayload(all_emp)
+    // const emp_encrypt = await encryptionPayload(all_emp)
       res.status(200).send({
         message: "Explore One Month All Emp",
         access: true,
-        all_emp: emp_encrypt,
+        all_emp: all_emp,
       });
     } else {
       res.status(200).send({
