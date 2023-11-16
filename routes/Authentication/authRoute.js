@@ -146,6 +146,9 @@ router.delete(
   catchAsync(Auth.renderOneInstituteAllUnApprovedStudentQuery)
 );
 
+// Update Device Token At User Id
+router.post("/todevice/token", catchAsync(Auth.fetchDeviceToken));
+
 // router.patch("/all/student/:id", catchAsync(Auth.renderAllStudentQuery));
 
 module.exports = router;

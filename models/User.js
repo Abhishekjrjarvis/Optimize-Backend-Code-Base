@@ -496,6 +496,9 @@ const userSchema = new mongoose.Schema(
     social_media_password_query: {
       type: String,
     },
+    qviple_id: {
+      type: String
+    }
   },
   { timestamps: true }
 );
@@ -522,7 +525,7 @@ userSchema.post("findOneAndDelete", async function (doc) {
         $in: doc.uNotify,
       },
     });
-  }
+  }  
 });
 
 const User = mongoose.model("User", userSchema);

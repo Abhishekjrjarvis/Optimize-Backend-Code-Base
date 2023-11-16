@@ -600,14 +600,16 @@ exports.verifyOtpByUser = async (req, res) => {
     ) {
       var userStatus = "approved";
       // Add Another Encryption
-      res.status(200).send({
+      const account_encrypt = {
         message: "OTP verified",
         id,
         userStatus,
         accounts: account_linked,
         count: account_linked?.length,
         access: true,
-      });
+      }
+      const acc_enc = await encryptionPayload(account_encrypt)
+      res.status(200).send(acc_enc);
       if (valid_otp) {
         await OTPCode.findByIdAndDelete(valid_otp?._id);
       } else if (valid_otp_email) {
@@ -619,12 +621,14 @@ exports.verifyOtpByUser = async (req, res) => {
       else {
       }
     } else {
-      res.status(200).send({
+      const account_encrypt = {
         message: "Invalid OTP",
         access: false,
         accounts: [],
         count: 0,
-      });
+      }
+      const acc_enc = await encryptionPayload(account_encrypt)
+      res.status(200).send(acc_enc);
     }
   } catch (e) {
     console.log(e);
@@ -4726,6 +4730,24 @@ exports.renderOneInstituteAllUnApprovedStudentQuery = async (req, res) => {
     console.log(e);
   }
 };
+
+exports.fetchDeviceToken = async (req, res) => {
+  try {
+    const { deviceToken, id } = req.body;
+    const user = await User.findOne({ _id: id });
+    const institute = await InstituteAdmin.findOne({ _id: id });
+    if (user) {
+      user.deviceToken = deviceToken;
+      await user.save();
+    } else if (institute) {
+      institute.deviceToken = deviceToken;
+      await institute.save();
+    } else {
+    }
+    res.status(200).send({ message: "device Token set" });
+  } catch {}
+};
+
 
 // exports.renderAllStudentQuery = async (req, res) => {
 //   try {

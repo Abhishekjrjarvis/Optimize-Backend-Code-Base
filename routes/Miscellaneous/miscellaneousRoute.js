@@ -39,7 +39,6 @@ router.get("/batch/list/data", isLoggedIn, catchAsync(All.getAllBatch));
 // All Video Data
 router.get("/video/list/data", isLoggedIn, catchAsync(All.getAllVideo));
 
-// Update Device Token At User Id
-router.post("/todevice/token", catchAsync(All.fetchDeviceToken));
+
 
 module.exports = router;
