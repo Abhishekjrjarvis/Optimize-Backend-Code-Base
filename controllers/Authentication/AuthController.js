@@ -168,8 +168,12 @@ exports.getRegisterIns = async (req, res) => {
         admins.instituteList.push(institute);
         admins.requestInstituteCount += 1;
         await Promise.all([admins.save(), institute.save(), qvipleId.save()]);
-        const iEncrypt = await encryptionPayload(institute);
-        res.status(201).send({ message: "Institute", institute: iEncrypt });
+        const ins_obj = {
+          message: "Institute", 
+          institute: institute
+        }
+        const iEncrypt = await encryptionPayload(ins_obj);
+        res.status(201).send(iEncrypt);
         const uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         });
@@ -231,8 +235,13 @@ exports.getPassIns = async (req, res) => {
         institute?._id,
         institute?.insPassword
       );
-      const iPassEncrypt = await encryptionPayload(institute);
-      res.json({ token: `Bearer ${token}`, institute: iPassEncrypt, login: true });
+      const ins_obj = {
+        institute: institute,
+        login: true,
+        token: `Bearer ${token}`
+      }
+      const iPassEncrypt = await encryptionPayload(ins_obj);
+      res.json(iPassEncrypt);
     } else {
       res.send({ message: "Invalid Combination", login: false });
     }
@@ -399,12 +408,12 @@ exports.getOtpAtUser = async (req, res) => {
           });
           // console.log(code);
           await otpCode.save();
-          const uPhoneEncrypt = await encryptionPayload(userPhoneNumber);
-          res.status(200).send({
+          const user_obj = {
             message: "code will be send to entered Phone Number || Email",
-            userPhoneNumber: uPhoneEncrypt,
-            // code,
-          });
+            userPhoneNumber: userPhoneNumber,
+          }
+          const uPhoneEncrypt = await encryptionPayload(user_obj);
+          res.status(200).send(uPhoneEncrypt);
         } else {
           res.send({ message: "User will be verified..." });
         }
@@ -430,11 +439,12 @@ exports.getOtpAtUser = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        const uPhoneEncrypt = await encryptionPayload(valid_user);
-        res.status(200).send({
+        const user_obj = {
           message: "code will be send to registered mobile number",
-          userPhoneNumber: uPhoneEncrypt,
-        });
+          userPhoneNumber: valid_user,
+        }
+        const uPhoneEncrypt = await encryptionPayload(user_obj);
+        res.status(200).send(uPhoneEncrypt);
       } else {
         res.send({ message: "User will be verified..." });
       }
@@ -448,12 +458,12 @@ exports.getOtpAtUser = async (req, res) => {
         });
         // console.log(code);
         await otpCode.save();
-        const uPhoneEncrypt = await encryptionPayload(userPhoneNumber);
-        res.status(200).send({
+        const user_obj = {
           message: "code will be send to entered Email",
-          userPhoneNumber: uPhoneEncrypt,
-          // code,
-        });
+          userPhoneNumber: userPhoneNumber,
+        }
+        const uPhoneEncrypt = await encryptionPayload(user_obj);
+        res.status(200).send(uPhoneEncrypt);
       } else {
         res.send({ message: "User will be verified..." });
       }
@@ -500,11 +510,12 @@ exports.getOtpAtIns = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        const iPhoneEncrypt = await encryptionPayload(valid_ins);
-        res.status(200).send({
+        const ins_obj = {
           message: "code will be send to registered mobile number",
-          insPhoneNumber: iPhoneEncrypt,
-        });
+          insPhoneNumber: valid_ins,
+        }
+        const iPhoneEncrypt = await encryptionPayload(ins_obj);
+        res.status(200).send(iPhoneEncrypt);
       } else {
         res.send({ message: "Institute Phone Number will be verified..." });
       }
@@ -719,12 +730,13 @@ exports.profileByUser = async (req, res) => {
           await unlinkFile(req.file.path);
         }
         const token = generateAccessToken(user?.username, user?._id);
-        const uLoginEncrypt = await encryptionPayload(user);
-        res.status(200).send({
+        const user_obj = {
           message: "Profile Successfully Created...",
-          user: uLoginEncrypt,
+          user: user,
           token: `Bearer ${token}`,
-        });
+        }
+        const uLoginEncrypt = await encryptionPayload(user_obj);
+        res.status(200).send(uLoginEncrypt);
         var uInstitute = await InstituteAdmin.findOne({
           isUniversal: "Universal",
         })
@@ -860,8 +872,13 @@ exports.getUserPassword = async (req, res) => {
           user?._id,
           user?.userPassword
         );
-        const uPassEncrypt = await encryptionPayload(user);
-        res.json({ token: `Bearer ${token}`, user: uPassEncrypt, login: true });
+        const user_obj = {
+          token: `Bearer ${token}`,
+          user: user, 
+          login: true
+        }
+        const uPassEncrypt = await encryptionPayload(user_obj);
+        res.json(uPassEncrypt);
       } else {
         res.send({ message: "Invalid Password Combination", login: false });
       }
@@ -887,11 +904,12 @@ exports.forgotPasswordSendOtp = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        const fEncrypt = await encryptionPayload(user);
-        res.status(200).send({
+        const forgot_encrypt = {
           message: "code will be send to registered mobile number",
-          user: fEncrypt,
-        });
+          user: user,
+        }
+        const fEncrypt = await encryptionPayload(forgot_encrypt);
+        res.status(200).send(fEncrypt);
       } else if (user?.userEmail) {
         await OTPCode.deleteMany({ otp_email: user?.userEmail });
         const code = await send_email_authentication(user?.userEmail);
@@ -900,11 +918,12 @@ exports.forgotPasswordSendOtp = async (req, res) => {
           otp_code: `${code}`,
         });
         await otpCode.save();
-        const fEncrypt = await encryptionPayload(user);
-        res.status(200).send({
+        const forgot_encrypt = {
           message: "code will be send to registered email",
-          user: fEncrypt,
-        });
+          user: user,
+        }
+        const fEncrypt = await encryptionPayload(forgot_encrypt);
+        res.status(200).send(fEncrypt);
       } else {
       }
     } else if (institute) {
@@ -915,11 +934,12 @@ exports.forgotPasswordSendOtp = async (req, res) => {
         otp_code: `${code}`,
       });
       await otpCode.save();
-      const fEncrypt = await encryptionPayload(institute);
-      res.status(200).send({
+      const forgot_encrypt = {
         message: "code will be send to registered mobile number",
-        institute: fEncrypt,
-      });
+        institute: institute,
+      }
+      const fEncrypt = await encryptionPayload(forgot_encrypt);
+      res.status(200).send(fEncrypt);
     } else {
       res.status(200).send({ message: "Invalid Username" });
     }
@@ -941,8 +961,13 @@ exports.forgotPasswordVerifyOtp = async (req, res) => {
         req.body.userOtpCode &&
         req.body.userOtpCode === `${valid_otp_user?.otp_code}`
       ) {
-        const oEncrypt = await encryptionPayload(user);
-        res.status(200).send({ message: "Otp verified", user: oEncrypt, access: true });
+        const otp_encrypt = {
+          message: "Otp verified", 
+          user: user, 
+          access: true
+        }
+        const oEncrypt = await encryptionPayload(otp_encrypt);
+        res.status(200).send(oEncrypt);
         await OTPCode.findByIdAndDelete(valid_otp_user?._id);
       } else {
         res.status(200).send({ message: "Invalid OTP", access: false });
@@ -955,10 +980,15 @@ exports.forgotPasswordVerifyOtp = async (req, res) => {
         req.body.userOtpCode &&
         req.body.userOtpCode === `${valid_otp_ins?.otp_code}`
       ) {
-        const oEncrypt = await encryptionPayload(institute);
+        const otp_encrypt = {
+          message: "Otp verified", 
+          institute: institute, 
+          access: true
+        }
+        const oEncrypt = await encryptionPayload(otp_encrypt);
         res
           .status(200)
-          .send({ message: "Otp verified", institute: oEncrypt, access: true });
+          .send(oEncrypt);
         await OTPCode.findByIdAndDelete(valid_otp_ins?._id);
       } else {
         res.status(200).send({ message: "Invalid OTP", access: false });
@@ -982,23 +1012,39 @@ exports.getNewPassword = async (req, res) => {
       if (userPassword === userRePassword) {
         user.userPassword = hashUserPass;
         await user.save();
-        const nEncrypt = await encryptionPayload(user);
+        const otp_encrypt = {
+          message: "Password Changed Successfully", 
+          user: user
+        }
+        const nEncrypt = await encryptionPayload(otp_encrypt);
         res
           .status(200)
-          .send({ message: "Password Changed Successfully", user: nEncrypt });
+          .send(nEncrypt);
       } else {
-        res.status(200).send({ message: "Invalid Password Combination" });
+        const otp_encrypt = {
+          message: "Invalid Password Combination"
+        }
+        const nEncrypt = await encryptionPayload(otp_encrypt);
+        res.status(200).send(nEncrypt);
       }
     } else if (institute) {
       if (userPassword === userRePassword) {
         institute.insPassword = hashUserPass;
         await institute.save();
-        const nEncrypt = await encryptionPayload(institute);
+        const otp_encrypt = {
+          message: "Password Changed Successfully", 
+          institute: institute
+        }
+        const nEncrypt = await encryptionPayload(otp_encrypt);
         res
           .status(200)
-          .send({ message: "Password Changed Successfully", institute: nEncrypt });
+          .send(nEncrypt);
       } else {
-        res.status(200).send({ message: "Invalid Password Combination" });
+        const otp_encrypt = {
+          message: "Invalid Password Combination"
+        }
+        const nEncrypt = await encryptionPayload(otp_encrypt);
+        res.status(200).send(nEncrypt);
       }
     } else {
     }
@@ -1088,15 +1134,16 @@ module.exports.authentication = async (req, res) => {
             institute?._id,
             institute?.insPassword
           );
-          const loginEncrypt = await encryptionPayload(institute);
-          res.json({
+          const otp_encrypt = {
             token: `Bearer ${token}`,
-            institute: loginEncrypt,
+            institute: institute,
             login: true,
             main_role: checkUserSocialPass
               ? "SOCIAL_MEDIA_HANDLER"
               : "MAIN_ADMIN",
-          });
+          }
+          const loginEncrypt = await encryptionPayload(otp_encrypt);
+          res.status(200).send(loginEncrypt);
         } else if (institute.activeStatus === "Activated") {
           institute.last_login = new Date();
           await institute.save();
@@ -1108,15 +1155,16 @@ module.exports.authentication = async (req, res) => {
             institute?._id,
             institute?.insPassword
           );
-          const loginEncrypt = await encryptionPayload(institute);
-          res.json({
+          const otp_encrypt = {
             token: `Bearer ${token}`,
-            institute: loginEncrypt,
+            institute: institute,
             login: true,
             main_role: checkUserSocialPass
               ? "SOCIAL_MEDIA_HANDLER"
               : "MAIN_ADMIN",
-          });
+          }
+          const loginEncrypt = await encryptionPayload(otp_encrypt);
+          res.status(200).send(loginEncrypt);
         } else {
           res.status(401).send({ message: "Unauthorized", login: false });
         }
@@ -1135,8 +1183,13 @@ module.exports.authentication = async (req, res) => {
           admin?._id,
           admin?.userPassword
         );
-        const loginEncrypt = await encryptionPayload(admin);
-        res.json({ token: `Bearer ${token}`, admin: loginEncrypt, login: true });
+        const admin_encrypt = {
+          token: `Bearer ${token}`, 
+          admin: admin, 
+          login: true
+        }
+        const loginEncrypt = await encryptionPayload(admin_encrypt);
+        res.status(200).send(loginEncrypt);
       } else {
         res.send({ message: "Invalid Credentials", login: false });
       }
@@ -1160,25 +1213,27 @@ module.exports.authentication = async (req, res) => {
               user?._id,
               user?.userPassword
             );
-            const loginEncrypt = await encryptionPayload(user);
-            res.json({
+            const admin_encrypt = {
               token: `Bearer ${token}`,
-              user: loginEncrypt,
+              user: user,
               login: true,
-            });
+            }
+            const loginEncrypt = await encryptionPayload(admin_encrypt);
+            res.status(200).send(loginEncrypt);
           } else if (user.activeStatus === "Activated") {
             const token = generateAccessToken(
               user?.username,
               user?._id,
               user?.userPassword
             );
-            const loginEncrypt = await encryptionPayload(user);
-            res.json({
+            const admin_encrypt = {
               token: `Bearer ${token}`,
-              user: loginEncrypt,
+              user: user,
               login: true,
               is_developer: user?.is_developer,
-            });
+            }
+            const loginEncrypt = await encryptionPayload(admin_encrypt);
+            res.status(200).send(loginEncrypt);
             user.last_login = new Date();
             await user.save();
           } else {
@@ -1408,24 +1463,28 @@ exports.searchByUsernameQuery = async (req, res) => {
         .exec();
 
       if (one_ins) {
-        const insEncrypt = await encryptionPayload(one_ins);
-        res.status(202).send({
+        const ins_obj = {
           message: "Username already exists 🙄",
           seen: true,
-          username: insEncrypt,
-        });
+          username: one_ins,
+        }
+        const insEncrypt = await encryptionPayload(ins_obj);
+        res.status(202).send(insEncrypt);
       } else if (one_user) {
-        const userEncrypt = await encryptionPayload(one_user);
-        res.status(202).send({
+        const ins_obj = {
           message: "Username already exists 🙄",
           seen: true,
-          username: userEncrypt,
-        });
+          username: one_user,
+        }
+        const userEncrypt = await encryptionPayload(ins_obj);
+        res.status(202).send(userEncrypt);
       } else {
-        res.status(200).send({
+        const ins_obj = {
           message: "this username does not exists in lake 🔍",
           seen: false,
-        });
+        }
+        const userEncrypt = await encryptionPayload(ins_obj);
+        res.status(200).send(userEncrypt);
       }
     }
   } catch (e) {
