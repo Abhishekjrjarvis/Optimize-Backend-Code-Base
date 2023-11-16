@@ -273,7 +273,6 @@ exports.retrieveFinanceQuery = async (req, res) => {
         select:
           "staffFirstName staffMiddleName staffLastName photoId staffProfilePhoto staffROLLNO",
       });
-    const financeEncrypt = await encryptionPayload(finance);
     // const cached = await connect_redis_miss(
     //   `Finance-Detail-${fid}`,
     //   finance
@@ -288,12 +287,13 @@ exports.retrieveFinanceQuery = async (req, res) => {
         finance.enable_protection = false;
       }
     }
-    res.status(200).send({
-      message: "Finance",
-      finance: financeEncrypt,
+    const finance_bind = {
+      message: "Finance Master Query",
+      finance: finance,
       roles: req?.query?.mod_id ? value?.permission : null,
-      // finance: cached.finance
-    });
+    }
+    const financeEncrypt = await encryptionPayload(finance_bind);
+    res.status(200).send(financeEncrypt);
   } catch (e) {
     console.log(e);
   }
@@ -827,16 +827,16 @@ exports.retrievePaymentDetail = async (req, res) => {
     const bank = await InstituteAdmin.findById({ _id: id }).select(
       "bankAccountHolderName paymentBankStatus bankAccountNumber bankAccountType bankAccountPhoneNumber bankIfscCode razor_key razor_id razor_account"
     );
-    const bankEncrypt = await encryptionPayload(bank);
+    const bank_bind = {
+      message: "One Institute Payment Detail",
+      bank: bank,
+    }
+    const bankEncrypt = await encryptionPayload(bank_bind);
     // const cached = await connect_redis_miss(
     //   `Finance-Ins-Bank-Detail-${id}`,
     //   bank
     // );
-    res.status(200).send({
-      message: "Payment Detail",
-      bank: bankEncrypt,
-      // bank: cached.bank
-    });
+    res.status(200).send(bankEncrypt);
   } catch (e) {
     console.log(e);
   }
@@ -867,23 +867,24 @@ exports.retrieveIncomeQuery = async (req, res) => {
         path: "incomeFromUser",
         select: "username userLegalName photoId profilePhoto",
       });
-    const iEncrypt = await encryptionPayload(incomes);
     // const cached = await connect_redis_miss(
     //   `Finance-All-Incomes-${fid}`,
     //   incomes
     // );
     if (incomes?.length > 0) {
-      res.status(200).send({
+      const income_bind = {
         message: "All Incomes",
-        allIncome: iEncrypt,
-        // allIncome: cached.incomes,
-      });
+        allIncome: incomes,
+      }
+    const iEncrypt = await encryptionPayload(income_bind);
+      res.status(200).send(iEncrypt);
     } else {
-      res.status(200).send({
+      const income_bind = {
         message: "No Incomes",
         allIncome: [],
-        // allIncome: cached.incomes,
-      });
+      }
+    const iEncrypt = await encryptionPayload(income_bind);
+      res.status(200).send(iEncrypt);
     }
   } catch (e) {
     console.log(e);
@@ -915,23 +916,25 @@ exports.retrieveExpenseQuery = async (req, res) => {
         path: "expensePaidUser",
         select: "username userLegalName photoId profilePhoto",
       });
-    const eEncrypt = await encryptionPayload(expenses);
     // const cached = await connect_redis_miss(
     //   `Finance-All-Expenses-${fid}`,
     //   expenses
     // );
     if (expenses?.length > 0) {
-      res.status(200).send({
+      const expense_bind = {
         message: "All Expenses",
-        allIncome: eEncrypt,
-        // allIncome: cached.expenses,
-      });
+        allIncome: expenses,
+      }
+    const eEncrypt = await encryptionPayload(expense_bind);
+
+      res.status(200).send(eEncrypt);
     } else {
-      res.status(200).send({
+      const expense_bind = {
         message: "No Expenses",
         allIncome: [],
-        // allIncome: cached.expenses,
-      });
+      }
+    const eEncrypt = await encryptionPayload(expense_bind);
+      res.status(200).send(eEncrypt);
     }
   } catch {}
 };
@@ -1054,12 +1057,16 @@ exports.retrieveIncomeBalance = async (req, res) => {
     const finance = await Finance.findById({ _id: fid }).select(
       "financeIncomeCashBalance financeIncomeBankBalance"
     );
-    const incomeEncrypt = await encryptionPayload(finance);
+    const income_bind = {
+      message: "Income Balance", 
+      incomeBalance: finance
+    }
+    const incomeEncrypt = await encryptionPayload(income_bind);
     // const cached = await connect_redis_miss(
     //   `Finance-All-Class-Reject-${fid}`,
     //   bind_reject
     // );
-    res.status(200).send({ message: "Income Balance", incomeBalance: incomeEncrypt });
+    res.status(200).send(incomeEncrypt);
   } catch (e) {
     // console.log(e)
   }
@@ -1071,10 +1078,14 @@ exports.retrieveExpenseBalance = async (req, res) => {
     const finance = await Finance.findById({ _id: fid }).select(
       "financeExpenseCashBalance financeExpenseBankBalance"
     );
-    const expenseEncrypt = await encryptionPayload(finance);
+    const expense_bind = {
+      message: "Expense Balance", 
+      expenseBalance: finance
+    }
+    const expenseEncrypt = await encryptionPayload(expense_bind);
     res
       .status(200)
-      .send({ message: "Expense Balance", expenseBalance: expenseEncrypt });
+      .send(expenseEncrypt);
   } catch (e) {
     // console.log(e)
   }
