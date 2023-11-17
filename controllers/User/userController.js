@@ -55,7 +55,7 @@ exports.retrieveProfileData = async (req, res) => {
       var post = [];
     }
     const qvipleId = await QvipleId.findOne({ user: `${user?._id}`})
-    user.qviple_id = qvipleId?._id
+    user.qviple_id = qvipleId?.qviple_id
     // Add Another Encryption
     res.status(200).send({
       message: "Limit User Profile Data ",
@@ -1311,7 +1311,7 @@ exports.getDashDataQuery = async (req, res) => {
       var post = [];
     }
     const qvipleId = await QvipleId.findOne({ user: `${user?._id}`})
-    user.qviple_id = qvipleId?._id
+    user.qviple_id = qvipleId?.qviple_id
     if (user) {
       // Add Another Encryption
       res.status(200).send({
