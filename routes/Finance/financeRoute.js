@@ -519,4 +519,21 @@ router.patch(
   catchAsync(Finance.renderValidBankQuery)
 );
 
+router
+  .route("/internal/fee/:fid")
+  .post(catchAsync(Finance.renderNewInternalFeesQuery));
+
+router
+  .route("/all/internal/fee/:fid")
+  .get(catchAsync(Finance.renderAllInternalFeesQuery));
+
+router
+  .route("/manage/tab/:fid")
+  .patch(catchAsync(Finance.renderManageTabQuery));
+
+router
+  .route("/validate/structure/query")
+  .get(catchAsync(Finance.renderValidateStructureQuery));
+  
+
 module.exports = router;

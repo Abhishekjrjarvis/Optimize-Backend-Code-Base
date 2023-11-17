@@ -63,6 +63,7 @@ const {
 const NewApplication = require("../../models/Admission/NewApplication");
 const Transport = require("../../models/Transport/transport");
 const Vehicle = require("../../models/Transport/vehicle");
+const InternalFees = require("../../models/RazorPay/internalFees");
 
 exports.getFinanceDepart = async (req, res) => {
   try {
@@ -261,7 +262,7 @@ exports.retrieveFinanceQuery = async (req, res) => {
     //   });
     const finance = await Finance.findById({ _id: fid })
       .select(
-        "financeName financeEmail financePhoneNumber enable_protection moderator_role moderator_role_count financeAbout photoId photo cover coverId financeCollectedBankBalance financeTotalBalance financeRaisedBalance financeExemptBalance financeCollectedSBalance financeBankBalance financeCashBalance financeSubmitBalance financeTotalBalance financeEContentBalance financeApplicationBalance financeAdmissionBalance financeIncomeCashBalance financeIncomeBankBalance financeExpenseCashBalance financeExpenseBankBalance payment_modes_type bank_account_count fees_category_count exempt_receipt_count government_receipt_count fee_master_array_count designation_status"
+        "financeName financeEmail financePhoneNumber enable_protection moderator_role moderator_role_count tab_manage financeAbout photoId photo cover coverId financeCollectedBankBalance financeTotalBalance financeRaisedBalance financeExemptBalance financeCollectedSBalance financeBankBalance financeCashBalance financeSubmitBalance financeTotalBalance financeEContentBalance financeApplicationBalance financeAdmissionBalance financeIncomeCashBalance financeIncomeBankBalance financeExpenseCashBalance financeExpenseBankBalance payment_modes_type bank_account_count fees_category_count exempt_receipt_count government_receipt_count fee_master_array_count designation_status"
       )
       .populate({
         path: "institute",
@@ -5473,6 +5474,164 @@ exports.renderValidBankQuery = async (req, res) => {
     console.log(e);
   }
 };
+
+
+exports.renderNewInternalFeesQuery = async (req, res) => {
+  try {
+    const { fid } = req?.params
+    const { ClassId, did } = req.body;
+    const finance = await Finance.findById({ _id: fid })
+    const department = await Department.findById({ _id: did });
+    var feeData = new Fees({ ...req.body });
+    department.fees.push(feeData._id);
+    finance.fees.push(feeData._id)
+    finance.fees_count += 1
+    feeData.finance = finance?._id
+    feeData.feeDepartment = department._id;
+    for (let i = 0; i < ClassId.length; i++) {
+      const classes = await Class.findById({ _id: ClassId[i] });
+      classes.fee.push(feeData._id);
+      await classes.save();
+    }
+
+    await Promise.all([feeData.save(), department.save(), finance.save()]);
+    res.status(201).send({ message: `${feeData.feeName} Fees Raised` });
+    for (let i = 0; i < department.ApproveStudent.length; i++) {
+      const student = await Student.findById({
+        _id: department.ApproveStudent[i],
+      });
+      const notify = new StudentNotification({});
+      const user = await User.findById({ _id: `${student.user}` });
+      notify.notifyContent = `New ${feeData.feeName} (fee) has been created. check your member's Tab`;
+      notify.notify_hi_content = `नवीन ${feeData.feeName} (fee) बनाई गई है। अपना सदस्य टैब देखे |`;
+      notify.notify_mr_content = `नवीन ${feeData.feeName} (fee) तयार केली आहे. तुमच्या सदस्याचा टॅब तपासा.`;
+      notify.notifySender = department._id;
+      notify.notifyReceiever = user._id;
+      notify.notifyType = "Student";
+      notify.notifyPublisher = student._id;
+      notify.feesId = feeData._id;
+      user.activity_tab.push(notify._id);
+      notify.notifyByDepartPhoto = department._id;
+      notify.notifyCategory = "Fee";
+      notify.redirectIndex = 5;
+      //
+      invokeMemberTabNotification(
+        "Student Activity",
+        notify,
+        "New Fees",
+        user._id,
+        user.deviceToken,
+        "Student",
+        notify
+      );
+      //
+      await Promise.all([user.save(), notify.save()]);
+    }
+    //
+    for (let i = 0; i < ClassId.length; i++) {
+      const classes = await Class.findById({ _id: ClassId[i] });
+      const student = await Student.find({ studentClass: `${classes._id}` });
+      for (var ref of student) {
+        const new_internal = new InternalFees({});
+        new_internal.internal_fee_type = "Fees";
+        new_internal.internal_fee_amount = feeData?.feeAmount;
+        new_internal.fees = feeData?._id;
+        new_internal.internal_fee_reason = feeData?.feeName;
+        new_internal.student = ref?._id;
+        new_internal.department = department?._id;
+        ref.studentRemainingFeeCount += feeData.feeAmount;
+        ref.internal_fees_query.push(new_internal?._id);
+        await Promise.all([ref.save(), new_internal.save()]);
+      }
+    }
+    // const finance = await Finance.findById({
+    //   _id: `${institute.financeDepart[0]}`,
+    // });
+    //
+    var strength = 0;
+    for (let i = 0; i < ClassId.length; i++) {
+      const classes = await Class.findById({ _id: ClassId[i] }).select(
+        "ApproveStudent"
+      );
+      strength += classes.ApproveStudent?.length;
+    }
+    if (strength > 0) {
+      finance.financeRaisedBalance += feeData.feeAmount * strength;
+      await finance.save();
+    } else {
+      finance.financeRaisedBalance += feeData.feeAmount * strength;
+      await finance.save();
+    }
+    //
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+exports.renderAllInternalFeesQuery = async(req, res) => {
+  try{
+    const { fid } = req.params
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const skip = (page - 1) * limit;
+    if(!fid) return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+
+    var finance = await Finance.findById({ _id: fid })
+    var all_fees = await Fees.find({ _id: { $in: finance?.fees }})
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .skip(skip)
+
+    if(all_fees?.length > 0){
+      res.status(200).send({ message: "Explore All Internal Fees Query ", access: true, all_fees: all_fees})
+    }
+    else{
+      res.status(200).send({ message: "No Internal Fees Query", access: false, all_fees: []})
+    }
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
+exports.renderManageTabQuery = async(req, res) => {
+  try{
+    const { fid } = req.params
+    if(!fid) return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+
+    await Finance.findByIdAndUpdate(fid, req?.body)
+    res.status(200).send({ message: "Explore Available Tabs Queyr", access: true})
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
+exports.renderValidateStructureQuery = async(req, res) => {
+  try{
+    const exist_structure = await FeeStructure.find({ $and: [{ category_master: `${req.body?.category_master}`}, { class_master: `${req.body?.class_master}`}, { batch_master: `${req.body?.batch_master}`}]})
+    if(exist_structure?.length > 0){
+      res.status(200).send({
+        message: "Fee Structure Already Exists",
+        access: false,
+        avail_struct: exist_structure?.length,
+        exist_structure: exist_structure
+      });
+    }
+    else{
+      res.status(200).send({
+        message: "Proceed with new structure",
+        access: true,
+        avail_struct: 0,
+        exist_structure: []
+      });
+    }
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
 
 // exports.updateAlias = async(req, res) => {
 //   try{

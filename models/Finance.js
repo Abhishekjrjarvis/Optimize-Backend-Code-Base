@@ -503,6 +503,66 @@ const financeSchema = new mongoose.Schema(
       batch: [],
       master: [],
     },
+    fees: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Fees"
+      }
+    ],
+    fees_count: {
+      type: Number,
+      default: 0
+    },
+    tab_manage: {
+      all_students: {
+        type: Boolean,
+        default: true
+      },
+      bank_details: {
+        type: Boolean,
+        default: true
+      },
+      pending_fees: {
+        type: Boolean,
+        default: false
+      },
+      incomes: {
+        type: Boolean,
+        default: true
+      },
+      expenses: {
+        type: Boolean,
+        default: true
+      },
+      submit_request: {
+        type: Boolean,
+        default: false
+      },
+      scholarships: {
+        type: Boolean,
+        default: false
+      },
+      exemption: {
+        type: Boolean,
+        default: false
+      },
+      deposits: {
+        type: Boolean,
+        default: false
+      },
+      transaction_history: {
+        type: Boolean,
+        default: false
+      },
+      data_export: {
+        type: Boolean,
+        default: true
+      },
+      finance_mods: {
+        type: Boolean,
+        default: true
+      },
+    }
   },
   { timestamps: true }
 );
