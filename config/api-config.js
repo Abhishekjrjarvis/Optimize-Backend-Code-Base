@@ -57,6 +57,13 @@ const academics = require("../routes/Academics/academicRoute");
 const department = require("../routes/Department/departmentRoute");
 const copoRoute = require("../routes/Copo/copoRoute");
 
+
+// V2 
+
+const guestV2 = require("../OptimizeRoute/GuestOnline/guestRoute");
+const userNewV2 = require("../OptimizeRoute/User/userRoute");
+const extraNewV2 = require("../OptimizeRoute/Extra/extraRoute");
+
 // Api Middleware Func
 
 router.use("/api/v1/search", searchRoute);
@@ -115,5 +122,10 @@ router.use("/api/v1/department", department);
 router.use("/api/v1/copo", copoRoute);
 
 router.use("/api/v1/prod/access", prod);
+
+
+router.use("/api/v2/guest/pay/online", guestV2);
+router.use("/api/v2/user", userNewV2);
+router.use("/api/v2/extra", extraNewV2);
 
 module.exports = router;

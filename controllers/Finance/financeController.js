@@ -294,7 +294,7 @@ exports.retrieveFinanceQuery = async (req, res) => {
       roles: req?.query?.mod_id ? value?.permission : null,
     }
     const financeEncrypt = await encryptionPayload(finance_bind);
-    res.status(200).send(financeEncrypt);
+    res.status(200).send({ encrypt: financeEncrypt });
   } catch (e) {
     console.log(e);
   }
@@ -837,7 +837,7 @@ exports.retrievePaymentDetail = async (req, res) => {
     //   `Finance-Ins-Bank-Detail-${id}`,
     //   bank
     // );
-    res.status(200).send(bankEncrypt);
+    res.status(200).send({ encrypt: bankEncrypt });
   } catch (e) {
     console.log(e);
   }
@@ -878,14 +878,14 @@ exports.retrieveIncomeQuery = async (req, res) => {
         allIncome: incomes,
       }
     const iEncrypt = await encryptionPayload(income_bind);
-      res.status(200).send(iEncrypt);
+      res.status(200).send({ encrypt: iEncrypt });
     } else {
       const income_bind = {
         message: "No Incomes",
         allIncome: [],
       }
     const iEncrypt = await encryptionPayload(income_bind);
-      res.status(200).send(iEncrypt);
+      res.status(200).send({ encrypt: iEncrypt });
     }
   } catch (e) {
     console.log(e);
@@ -928,14 +928,14 @@ exports.retrieveExpenseQuery = async (req, res) => {
       }
     const eEncrypt = await encryptionPayload(expense_bind);
 
-      res.status(200).send(eEncrypt);
+      res.status(200).send({ encrypt: eEncrypt });
     } else {
       const expense_bind = {
         message: "No Expenses",
         allIncome: [],
       }
     const eEncrypt = await encryptionPayload(expense_bind);
-      res.status(200).send(eEncrypt);
+      res.status(200).send({ encrypt: eEncrypt });
     }
   } catch {}
 };
@@ -1067,7 +1067,7 @@ exports.retrieveIncomeBalance = async (req, res) => {
     //   `Finance-All-Class-Reject-${fid}`,
     //   bind_reject
     // );
-    res.status(200).send(incomeEncrypt);
+    res.status(200).send({ encrypt: incomeEncrypt });
   } catch (e) {
     // console.log(e)
   }
@@ -1086,7 +1086,7 @@ exports.retrieveExpenseBalance = async (req, res) => {
     const expenseEncrypt = await encryptionPayload(expense_bind);
     res
       .status(200)
-      .send(expenseEncrypt);
+      .send({ encrypt: expenseEncrypt });
   } catch (e) {
     // console.log(e)
   }
@@ -1111,7 +1111,7 @@ exports.retrieveRemainFeeBalance = async (req, res) => {
       remain: remain
     }
     const remainEncrypt = await encryptionPayload(remain);
-    res.status(200).send(remainEncrypt);
+    res.status(200).send({ encrypt: remainEncrypt });
   } catch (e) {
     // console.log(e)
   }
@@ -1185,7 +1185,7 @@ exports.allEmpToFinance = async (req, res) => {
       allEmp: allEmp
     }
     const empEncrypt = await encryptionPayload(staff_bind);
-    res.status(200).send(empEncrypt);
+    res.status(200).send({ encrypt: empEncrypt });
   } catch (e) {
     console.log(e);
   }
@@ -1540,14 +1540,14 @@ exports.retrieveRemainFeeList = async (req, res) => {
       const sEncrypt = await encryptionPayload(fee_bind);
       res
         .status(200)
-        .send(sEncrypt);
+        .send({ encrypt: sEncrypt });
     } else {
       const fee_bind = {
         message: "No Remaining Fee List", 
         list: []
       }
       const sEncrypt = await encryptionPayload(fee_bind);
-      res.status(200).send(sEncrypt);
+      res.status(200).send({ encrypt: sEncrypt });
     }
   } catch (e) {
     console.log(e);
@@ -1566,7 +1566,7 @@ exports.retrieveOneIncomeQuery = async (req, res) => {
       oneIncome: i_detail
     }
     const iOneEncrypt = await encryptionPayload(income_bind);
-    res.status(200).send(iOneEncrypt);
+    res.status(200).send({ encrypt: iOneEncrypt });
   } catch {}
 };
 
@@ -1584,7 +1584,7 @@ exports.retrieveOneExpenseQuery = async (req, res) => {
     const eOneEncrypt = await encryptionPayload(expense_bind);
     res
       .status(200)
-      .send(eOneEncrypt);
+      .send({ encrypt: eOneEncrypt });
   } catch {}
 };
 
@@ -1609,7 +1609,7 @@ exports.retrieveAllStaffArray = async (req, res) => {
     const staffEncrypt = await encryptionPayload(all_bind);
     res
       .status(200)
-      .send(staffEncrypt);
+      .send({ encrypt: staffEncrypt });
   } catch {}
 };
 
@@ -2618,7 +2618,7 @@ exports.renderFinanceAllBankAccountQuery = async (req, res) => {
         all_accounts: all_accounts,
       }
       const all_bank_encrypt = await encryptionPayload(account_bind)
-      res.status(200).send(all_bank_encrypt);
+      res.status(200).send({ encrypt: all_bank_encrypt });
     } else {
       const account_bind = {
         message: "No Bank Account's Available 👍",
@@ -2626,7 +2626,7 @@ exports.renderFinanceAllBankAccountQuery = async (req, res) => {
         all_accounts: [],
       }
       const all_bank_encrypt = await encryptionPayload(account_bind)
-      res.status(200).send(all_bank_encrypt);
+      res.status(200).send({ encrypt: all_bank_encrypt });
     }
   } catch (e) {
     console.log(e);
@@ -2669,7 +2669,7 @@ exports.renderFinanceOneBankQuery = async (req, res) => {
         one_bank: one_bank,
       }
       const one_bank_encrypt = await encryptionPayload(account_bind)
-    res.status(200).send(one_bank_encrypt);
+    res.status(200).send({ encrypt: one_bank_encrypt });
   } catch (e) {
     console.log(e);
   }
@@ -3813,7 +3813,7 @@ exports.renderOneFeeReceipt = async (req, res) => {
     }
     const all_encrypt = await encryptionPayload(obj)
 
-    res.status(200).send(all_encrypt);
+    res.status(200).send({ encrypt: all_encrypt });
   } catch (e) {
     console.log(e);
   }
@@ -3951,7 +3951,7 @@ exports.renderOneTransportFeeReceipt = async (req, res) => {
       all_remain: all_remain
     }
     const all_encrypt = await encryptionPayload(obj)
-    res.status(200).send(all_encrypt);
+    res.status(200).send({ encrypt: all_encrypt });
   } catch (e) {
     console.log(e);
   }
@@ -4059,7 +4059,7 @@ exports.renderFinanceAllBankDetails = async (req, res) => {
       all_account: all_account
     }
     const query_encrypt = await encryptionPayload(obj)
-    res.status(200).send(query_encrypt);
+    res.status(200).send({ encrypt: query_encrypt });
   } catch (e) {
     console.log(e);
   }
