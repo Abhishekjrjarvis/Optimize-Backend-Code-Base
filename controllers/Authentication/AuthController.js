@@ -645,7 +645,9 @@ exports.verifyOtpByIns = async (req, res) => {
     ) {
       var insMobileStatus = "approved";
       // Add Another Encryption
-      res.send({ message: "OTP verified", id, insMobileStatus });
+      const ins_obj = { message: "OTP verified", id, insMobileStatus }
+      const ins_encrypt = await encryptionPayload(ins_obj)
+      res.status(200).send({ encrypt: ins_encrypt });
       await OTPCode.findByIdAndDelete(valid_otp?._id);
     } else {
       res.send({ message: "Invalid OTP" });
