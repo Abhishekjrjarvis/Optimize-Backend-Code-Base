@@ -533,7 +533,7 @@ router
 
 router
   .route("/validate/structure/query")
-  .get(catchAsync(Finance.renderValidateStructureQuery));
+  .patch(catchAsync(Finance.renderValidateStructureQuery));
   
 
 module.exports = router;

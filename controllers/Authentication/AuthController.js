@@ -1300,30 +1300,46 @@ exports.retrieveEmailRedundantQuery = async (req, res) => {
     var flag_email = false;
     if (check_ins) {
       flag_email = true;
-      res.status(200).send({
+      const flag_obj = {
         message: "Email Already Registered",
         flag: flag_email,
         valid_flag: { flag: true, emailId: check_ins?._id },
+      }
+      const flag_encrypt = await encryptionPayload(flag_obj)
+      res.status(200).send({
+        encrypt: flag_encrypt
       });
     } else if (check_user) {
       flag_email = true;
-      res.status(200).send({
+      const flag_obj = {
         message: "Email Already Registered",
         flag: flag_email,
         valid_flag: { flag: true, emailId: check_user?._id },
+      }
+      const flag_encrypt = await encryptionPayload(flag_obj)
+      res.status(200).send({
+        encrypt: flag_encrypt
       });
     } else if (check_admin) {
       flag_email = true;
-      res.status(200).send({
+      const flag_obj = {
         message: "Email Already Registered",
         flag: flag_email,
-        valid_flag: { flag: true, emailId: check_admin?._id },
+        valid_flag: { flag: true, emailId: check_user?._id },
+      }
+      const flag_encrypt = await encryptionPayload(flag_obj)
+      res.status(200).send({
+        encrypt: flag_encrypt
       });
     } else {
-      res.status(200).send({
+      const flag_obj = {
         message: "Valid Email",
         flag: flag_email,
         valid_flag: { flag: false, emailId: "" },
+      }
+      const flag_encrypt = await encryptionPayload(flag_obj)
+      res.status(200).send({
+        encrypt: flag_encrypt
       });
     }
   } catch (e) {
