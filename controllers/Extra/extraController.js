@@ -3578,7 +3578,7 @@ exports.renderShuffledStudentQuery = async(req, res) => {
       await subject.save()
       res.status(200).send({ message: "Explore Subject Wise Shuffling Query", access: true})
       for(var val of shuffle_arr){
-        subject.shuffled_students.splice(val?.index, 0, val?.value)
+        subject.shuffled_students.push(val)
       }
       await subject.save()
     }
@@ -3588,7 +3588,7 @@ exports.renderShuffledStudentQuery = async(req, res) => {
       await batch.save()
       res.status(200).send({ message: "Explore Batch Wise Shuffling Query", access: true})
       for(var val of shuffle_arr){
-        batch.class_student_query.splice(val?.index, 0, val?.value)
+        batch.class_student_query.push(val)
       }
       await batch.save()
     }

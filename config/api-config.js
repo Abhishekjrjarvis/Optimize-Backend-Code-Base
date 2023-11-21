@@ -63,6 +63,8 @@ const copoRoute = require("../routes/Copo/copoRoute");
 const guestV2 = require("../OptimizeRoute/GuestOnline/guestRoute");
 const userNewV2 = require("../OptimizeRoute/User/userRoute");
 const extraNewV2 = require("../OptimizeRoute/Extra/extraRoute");
+const uploadRouteV2 = require("../OptimizeRoute/UploadContent/index");
+const departmentV2 = require("../OptimizeRoute/Department/departmentRoute");
 
 // Api Middleware Func
 
@@ -127,5 +129,7 @@ router.use("/api/v1/prod/access", prod);
 router.use("/api/v2/guest/pay/online", guestV2);
 router.use("/api/v2/user", userNewV2);
 router.use("/api/v2/extra", extraNewV2);
+router.use("/api/v2/all-images", uploadRouteV2);
+router.use("/api/v2/department", departmentV2);
 
 module.exports = router;
