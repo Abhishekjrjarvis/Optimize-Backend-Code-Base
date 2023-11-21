@@ -3565,20 +3565,20 @@ exports.renderDeleteOneExcel = async (req, res) => {
 
 exports.renderShuffledStudentQuery = async(req, res) => {
   try{
-    const { sid, bid, flow, shuffle_arr } = req.body;
+    const { cid, bid, flow, shuffle_arr } = req.body;
     if (!flow)
       return res.status(200).send({
         message: "Their is a bug need to fixed immediatley",
         access: false,
       });
 
-    if(flow === "SUBJECT_WISE"){
-      const subject = await Subject.findById({ _id: sid })
-      subject.shuffled_students = []
-      await subject.save()
-      res.status(200).send({ message: "Explore Subject Wise Shuffling Query", access: true})
+    if(flow === "CLASS_WISE"){
+      const classes = await Class.findById({ _id: cid })
+      classes.ApproveStudent = []
+      await classes.save()
+      res.status(200).send({ message: "Explore Class Wise Shuffling Query", access: true})
       for(var val of shuffle_arr){
-        subject.shuffled_students.push(val)
+        classes.ApproveStudent.push(val)
       }
       await subject.save()
     }
