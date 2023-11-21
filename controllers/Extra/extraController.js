@@ -112,6 +112,7 @@ const {
 } = require("../../Import/ExcelImport");
 const { render_mark_attendence_query } = require("../Attendence");
 const CertificateQuery = require("../../models/Certificate/CertificateQuery");
+const Batch = require("../../models/Batch");
 // const encryptionPayload = require("../../Utilities/Encrypt/payload");
 
 exports.validateUserAge = async (req, res) => {
@@ -3561,3 +3562,41 @@ exports.renderDeleteOneExcel = async (req, res) => {
     console.log(e);
   }
 };
+
+exports.renderShuffledStudentQuery = async(req, res) => {
+  try{
+    const { sid, bid, flow, shuffle_arr } = req.body;
+    if (!flow)
+      return res.status(200).send({
+        message: "Their is a bug need to fixed immediatley",
+        access: false,
+      });
+
+    if(flow === "SUBJECT_WISE"){
+      const subject = await Subject.findById({ _id: sid })
+      subject.shuffled_students = []
+      await subject.save()
+      res.status(200).send({ message: "Explore Subject Wise Shuffling Query", access: true})
+      for(var val of shuffle_arr){
+        subject.shuffled_students.splice(val?.index, 0, val?.value)
+      }
+      await subject.save()
+    }
+    else if(flow === "BATCH_WISE"){
+      const batch = await Batch.findById({ _id: bid })
+      batch.class_student_query = []
+      await batch.save()
+      res.status(200).send({ message: "Explore Batch Wise Shuffling Query", access: true})
+      for(var val of shuffle_arr){
+        batch.class_student_query.splice(val?.index, 0, val?.value)
+      }
+      await batch.save()
+    }
+    else{
+      res.status(200).send({ message: "Invalid Flow Query", access: false})
+    }
+  }
+  catch(e){
+    console.log(e)
+  }
+}

@@ -112,6 +112,7 @@ const {
 } = require("../../Import/ExcelImport");
 const { render_mark_attendence_query } = require("../Attendence");
 const CertificateQuery = require("../../models/Certificate/CertificateQuery");
+const Batch = require("../../models/Batch");
 // const encryptionPayload = require("../../Utilities/Encrypt/payload");
 
 exports.validateUserAge = async (req, res) => {

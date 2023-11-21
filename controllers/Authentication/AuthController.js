@@ -1374,9 +1374,13 @@ exports.retrieveUsernameEditQuery = async (req, res) => {
         check_ins.next_date =
           payment_modal_activate.check_username_edit_query();
         await check_ins.save();
-        res.status(200).send({
+        const username_flag = {
           message: "Ins Username Granted for next update 😀👍",
           flag: true,
+        }
+        const username_encrypt = await encryptionPayload(username_flag)
+        res.status(200).send({
+          encrypt: username_encrypt
         });
         const post = await Post.find({ author: `${check_ins._id}` });
         post.forEach(async (ele) => {
@@ -1396,11 +1400,15 @@ exports.retrieveUsernameEditQuery = async (req, res) => {
           await reply.save();
         });
       } else {
-        res.status(200).send({
+        const username_flag = {
           message: `You will be able to change your username once in 45 days. next change available at ${moment(
             new Date(check_ins.next_date).toISOString()
           ).format("MMM Do YYYY")} 😀👍`,
           flag: false,
+        }
+        const username_encrypt = await encryptionPayload(username_flag)
+        res.status(200).send({
+          encrypt: username_encrypt
         });
       }
     } else if (check_user) {
@@ -1409,9 +1417,13 @@ exports.retrieveUsernameEditQuery = async (req, res) => {
         check_user.next_date =
           payment_modal_activate.check_username_edit_query();
         await check_user.save();
-        res.status(200).send({
+        const username_flag = {
           message: "User Username Granted for next update 😀👍",
           flag: true,
+        }
+        const username_encrypt = await encryptionPayload(username_flag)
+        res.status(200).send({
+          encrypt: username_encrypt
         });
         const post = await Post.find({ author: `${check_user._id}` });
         post.forEach(async (ele) => {
@@ -1443,22 +1455,35 @@ exports.retrieveUsernameEditQuery = async (req, res) => {
           await ansRep.save();
         });
       } else {
-        res.status(200).send({
+        const username_flag = {
           message: `You will be able to change your username once in 45 days. next change available at ${moment(
             new Date(check_user.next_date).toISOString()
           ).format("MMM Do YYYY")} 😀👍`,
           flag: false,
+        }
+        const username_encrypt = await encryptionPayload(username_flag)
+        res.status(200).send({
+          encrypt: username_encrypt
         });
       }
     } else if (check_admin) {
-      res.status(200).send({
+      const username_flag = {
         message: "Admin Username Granted for next update 😀👍",
         flag: true,
+      }
+      const username_encrypt = await encryptionPayload(username_flag)
+      res.status(200).send({
+        encrypt: username_encrypt
       });
     } else {
+      const username_flag = {
+        message: "Nothing found here to save 🙄", 
+        flag: false
+      }
+      const username_encrypt = await encryptionPayload(username_flag)
       res
         .status(200)
-        .send({ message: "Nothing found here to save 🙄", flag: false });
+        .send({ encrypt: username_encrypt });
     }
   } catch (e) {
     console.log(e);
