@@ -1908,16 +1908,16 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         .lean()
         .exec();
     }
-    const staffEncrypt = await encryptionPayload(staff);
+    const staff_obj = {
+      message: "All Staff Designation Feed from DB 🙌",
+      staff: staff,
+    }
+    const staffEncrypt = await encryptionPayload(staff_obj);
     // const cached = await connect_redis_miss(
     //   `Staff-Designation-Member-${sid}`,
     //   staff
     // );
-    res.status(200).send({
-      message: "All Staff Designation Feed from DB 🙌",
-      // staff: cached.staff,
-      staff: staffEncrypt,
-    });
+    res.status(200).send({ encrypt: staffEncrypt});
   } catch (e) {
     console.log(e);
   }
