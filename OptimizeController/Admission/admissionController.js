@@ -45,7 +45,7 @@ const {
 const BusinessTC = require("../../models/Finance/BToC");
 const StudentNotification = require("../../models/Marks/StudentNotification");
 const { file_to_aws } = require("../../Utilities/uploadFileAws");
-// const encryptionPayload = require("../../Utilities/Encrypt/payload");
+const encryptionPayload = require("../../Utilities/Encrypt/payload");
 const {
   connect_redis_hit,
   connect_redis_miss,
@@ -189,7 +189,7 @@ exports.retrieveAdmissionDetailInfo = async (req, res) => {
     //   });
     const admission = await Admission.findById({ _id: aid })
       .select(
-        "admissionAdminEmail admissionAdminPhoneNumber enable_protection moderator_role moderator_role_count completedCount exemptAmount requested_status collected_fee remainingFee admissionAdminAbout photoId coverId photo queryCount newAppCount cover offlineFee onlineFee remainingFeeCount refundCount export_collection_count designation_status active_tab_index alarm_enable alarm_enable_status"
+        "admissionAdminEmail admissionAdminPhoneNumber enable_protection tab_manage moderator_role moderator_role_count completedCount exemptAmount requested_status collected_fee remainingFee admissionAdminAbout photoId coverId photo queryCount newAppCount cover offlineFee onlineFee remainingFeeCount refundCount export_collection_count designation_status active_tab_index alarm_enable alarm_enable_status"
       )
       .populate({
         path: "admissionAdminHead",
@@ -205,7 +205,13 @@ exports.retrieveAdmissionDetailInfo = async (req, res) => {
         select:
           "_id insName insProfilePhoto status financeDepart hostelDepart random_institute_code alias_pronounciation",
       });
-    // const adsEncrypt = await encryptionPayload(admission);
+    const ads_obj = {
+      message: "All Detail Admission Admin from DB 🙌",
+      // admission: cached.admission,
+      admission: admission,
+      roles: req?.query?.mod_id ? value?.permission : null,
+    }
+    const adsEncrypt = await encryptionPayload(ads_obj);
     // const cached = await connect_redis_miss(
     //   `Admission-Detail-${aid}`,
     //   admission
@@ -221,10 +227,7 @@ exports.retrieveAdmissionDetailInfo = async (req, res) => {
       }
     }
     res.status(200).send({
-      message: "All Detail Admission Admin from DB 🙌",
-      // admission: cached.admission,
-      admission: admission,
-      roles: req?.query?.mod_id ? value?.permission : null,
+      encrypt: adsEncrypt
     });
   } catch (e) {
     console.log(e);
@@ -290,17 +293,26 @@ exports.retieveAdmissionAdminAllApplication = async (req, res) => {
         ref.confirmCount = ref?.confirmedApplication?.length;
         ref.receievedCount = ref?.receievedApplication?.length;
       }
-      res.status(200).send({
+      const ads_obj = {
         message: "All Ongoing Application from DB 🙌",
         // ongoing: cached.ongoing,
         // ongoingCount: cached.ongoingCount,
         ongoing: ongoing,
         ongoingCount: ongoing?.length,
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
+      res.status(200).send({
+        encrypt: adsEncrypt
       });
     } else {
+      const ads_obj = {
+        message: "Dark side in depth nothing to find", 
+        ongoing: []
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
       res
         .status(200)
-        .send({ message: "Dark side in depth nothing to find", ongoing: [] });
+        .send({ encrypt: adsEncrypt });
     }
   } catch (e) {
     console.log(e);
@@ -353,17 +365,26 @@ exports.retieveAdmissionAdminAllCApplication = async (req, res) => {
       //   `Admission-Completed-${aid}-${page}`,
       //   bind_complete
       // );
-      res.status(200).send({
+      const ads_obj = {
         message: "All Completed Applicationd from DB 🙌",
         // completed: cached.completed,
         // completedCount: cached.completedCount,
         completed: completed,
         completedCount: completed?.length,
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
+      res.status(200).send({
+        encrypt: adsEncrypt
       });
     } else {
+      const ads_obj = {
+        message: "Dark side in depth nothing to find", 
+        completed: []
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
       res
         .status(200)
-        .send({ message: "Dark side in depth nothing to find", completed: [] });
+        .send({ encrypt: adsEncrypt });
     }
   } catch (e) {
     console.log(e);
@@ -419,17 +440,26 @@ exports.retieveAdmissionAdminAllCDetailApplication = async (req, res) => {
       //   `Admission-Completed-${aid}-${page}`,
       //   bind_complete
       // );
-      res.status(200).send({
+      const ads_obj = {
         message: "All Completed Applicationd from DB 🙌",
         // completed: cached.completed,
         // completedCount: cached.completedCount,
         completed: completed,
         completedCount: completed?.length,
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
+      res.status(200).send({
+        encrypt: adsEncrypt
       });
     } else {
+      const ads_obj = {
+        message: "Dark side in depth nothing to find", 
+        completed: []
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
       res
         .status(200)
-        .send({ message: "Dark side in depth nothing to find", completed: [] });
+        .send({ encrypt: adsEncrypt });
     }
   } catch (e) {
     console.log(e);
@@ -607,18 +637,26 @@ exports.fetchAdmissionApplicationArray = async (req, res) => {
       //   `Institute-All-App-${id}-${page}`,
       //   bind_ins_app
       // );
-      res.status(200).send({
+      const ads_obj = {
         message: "Lets begin new year journey from DB 🙌",
         // allApp: cached.newApp,
         // allAppCount: cached.allAppCount,
         allApp: newApp,
         allAppCount: newApp?.length,
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
+      res.status(200).send({
+        encrypt: adsEncrypt
       });
       // }
     } else {
-      res.status(200).send({
+      const ads_obj = {
         message: "get a better lens to find what you need 🔍",
         allApp: [],
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
+      res.status(200).send({
+        encrypt: adsEncrypt
       });
     }
   } catch (e) {
@@ -3030,9 +3068,13 @@ exports.oneStudentViewRemainingFee = async (req, res) => {
       "admissionPaymentStatus"
     );
     // const remainEncrypt = await encryptionPayload(student.admissionPaymentStatus);
-    res.status(200).send({
+    const ads_obj = {
       message: "Remaining fee view",
       remain_fee: student.admissionPaymentStatus,
+    }
+    const adsEncrypt = await encryptionPayload(ads_obj);
+    res.status(200).send({
+      encrypt: adsEncrypt
     });
   } catch (e) {
     console.log(e);
@@ -3915,11 +3957,15 @@ exports.retrieveOneApplicationQuery = async (req, res) => {
     //   `One-Application-Detail-${aid}`,
     //   oneApply
     // );
-    res.status(200).send({
+    const ads_obj = {
       message:
         "Sit with a paper and pen to note down all details carefully from DB 🙌",
       // oneApply: cached.oneApply,
       oneApply: oneApply,
+    }
+    const adsEncrypt = await encryptionPayload(ads_obj);
+    res.status(200).send({
+      encrypt: adsEncrypt
     });
   } catch (e) {
     console.log(e);
@@ -4284,19 +4330,27 @@ exports.retrieveStudentAdmissionFees = async (req, res) => {
       //   `One-Student-AppFees-${sid}`,
       //   valid_remain
       // );
-      res.status(200).send({
+      const ads_obj = {
         message: "All Admission Fees",
         get: true,
         // array: cached.valid_remain,
         array: valid_remain,
         // student: student,
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
+      res.status(200).send({
+        encrypt: adsEncrypt
       });
     } else {
-      res.status(200).send({
+      const ads_obj = {
         message: "No Admission Fees",
         get: false,
         array: [],
         // student: student,
+      }
+      const adsEncrypt = await encryptionPayload(ads_obj);
+      res.status(200).send({
+        encrypt: adsEncrypt
       });
     }
   } catch (e) {
@@ -10502,6 +10556,19 @@ exports.renderArrangeClassQuery = async(req, res) => {
       await ele.save()
     }
     res.status(200).send({ message: "Explore Query", access: true})
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
+exports.renderManageTabQuery = async(req, res) => {
+  try{
+    const { aid } = req.params
+    if(!aid) return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+
+    await Admission.findByIdAndUpdate(aid, req?.body)
+    res.status(200).send({ message: "Explore Available Tabs Queyr", access: true})
   }
   catch(e){
     console.log(e)

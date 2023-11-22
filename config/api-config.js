@@ -60,6 +60,9 @@ const copoRoute = require("../routes/Copo/copoRoute");
 
 // V2 
 
+const authNewV2 = require("../OptimizeRoute/Authentication/authRoute");
+const financeNewV2 = require("../OptimizeRoute/Finance/financeRoute");
+const admissionNewV2 = require("../OptimizeRoute/Admission/admissionRoute");
 const guestV2 = require("../OptimizeRoute/GuestOnline/guestRoute");
 const userNewV2 = require("../OptimizeRoute/User/userRoute");
 const extraNewV2 = require("../OptimizeRoute/Extra/extraRoute");
@@ -82,8 +85,8 @@ router.use("/api/v1/admin", adminNew);
 router.use("/api/v1/ins", instituteNew);
 router.use("/api/v1/ins/post", institutePostRoute);
 router.use("/api/v1/admin/post", superAdminPostRoute);
-router.use("/api/v2/auth", authNew);
-router.use("/api/v2/finance", financeNew);
+router.use("/api/v1/auth", authNew);
+router.use("/api/v1/finance", financeNew);
 router.use("/api/v1/sport/arts", sportNew);
 router.use("/api/v1/all", miscellaneousNew);
 router.use("/api/v1/user", userNew);
@@ -100,7 +103,7 @@ router.use("/api/v1/edit/institute", instituteMemberRoute);
 router.use("/api/v1/edit/staff", staffMemberRoute);
 router.use("/api/v1/edit/student", studentMemberRoute);
 router.use("/api/v1/edit/user", userMemberRoute);
-router.use("/api/v2/admission", admissionNew);
+router.use("/api/v1/admission", admissionNew);
 router.use("/api/v1/dailyupdate", dailyUpdateRoute);
 router.use("/api/v1/timetable", timetableRoute);
 router.use("/api/v1/election/event", election);
@@ -126,6 +129,9 @@ router.use("/api/v1/copo", copoRoute);
 router.use("/api/v1/prod/access", prod);
 
 
+router.use("/api/v2/auth", authNewV2);
+router.use("/api/v2/finance", financeNewV2);
+router.use("/api/v2/admission", admissionNewV2);
 router.use("/api/v2/guest/pay/online", guestV2);
 router.use("/api/v2/user", userNewV2);
 router.use("/api/v2/extra", extraNewV2);

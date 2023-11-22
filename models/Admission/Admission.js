@@ -244,6 +244,52 @@ const admissionAdminSchema = new mongoose.Schema({
     batch: [],
     master: [],
   },
+  tab_manage: {
+    all_students: {
+      type: Boolean,
+      default: true
+    },
+    ongoing_admission: {
+      type: Boolean,
+      default: true
+    },
+    admission_enquiry: {
+      type: Boolean,
+      default: false
+    },
+    offline_payment_verification: {
+      type: Boolean,
+      default: true
+    },
+    pending_fee: {
+      type: Boolean,
+      default: true
+    },
+    scholarships_management: {
+      type: Boolean,
+      default: true
+    },
+    excess_fee: {
+      type: Boolean,
+      default: true
+    },
+    complete_admission: {
+      type: Boolean,
+      default: true
+    },
+    required_documents: {
+      type: Boolean,
+      default: false
+    },
+    data_export: {
+      type: Boolean,
+      default: true
+    },
+    admission_mods: {
+      type: Boolean,
+      default: true
+    },
+  }
 });
 
 module.exports = mongoose.model("Admission", admissionAdminSchema);
