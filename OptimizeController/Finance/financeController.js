@@ -1537,7 +1537,7 @@ exports.retrieveRemainFeeList = async (req, res) => {
       const fee_bind = {
         message: "Remaining Fee List", 
         list: sorted_zero,
-        search: valid_search
+        search: search ? true : false
       }
       const sEncrypt = await encryptionPayload(fee_bind);
       res
@@ -1546,7 +1546,8 @@ exports.retrieveRemainFeeList = async (req, res) => {
     } else {
       const fee_bind = {
         message: "No Remaining Fee List", 
-        list: []
+        list: [],
+        search: search ? true : false
       }
       const sEncrypt = await encryptionPayload(fee_bind);
       res.status(200).send({ encrypt: sEncrypt });
