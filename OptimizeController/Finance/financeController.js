@@ -1475,7 +1475,7 @@ exports.retrieveRemainFeeList = async (req, res) => {
     const studentList = await InstituteAdmin.findById({
       _id: `${finance?.institute}`,
     }).select("_id ApproveStudent");
-
+    var valid_search = false
     if (search) {
       var student = await Student.find({
         $and: [{ _id: { $in: studentList?.ApproveStudent } }],
@@ -1503,6 +1503,7 @@ exports.retrieveRemainFeeList = async (req, res) => {
           path: "user",
           select: "username userLegalName",
         });
+        valid_search = true
     } else {
       var student = await Student.find({
         _id: { $in: studentList?.ApproveStudent },
@@ -1536,7 +1537,7 @@ exports.retrieveRemainFeeList = async (req, res) => {
       const fee_bind = {
         message: "Remaining Fee List", 
         list: sorted_zero,
-        search: true
+        search: valid_search
       }
       const sEncrypt = await encryptionPayload(fee_bind);
       res
