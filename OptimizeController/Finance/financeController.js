@@ -5632,6 +5632,28 @@ exports.renderValidateStructureQuery = async(req, res) => {
   }
 }
 
+exports.renderFinanceDepartmentQuery = async(req, res) => {
+  try{
+    const { fid } = req?.params
+    if(!fid) return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+
+    const finance = await Finance.findById({ _id: fid })
+
+    var all_department = await Department.find({ institute: `${finance?.institute}` })
+
+    if(all_department?.length > 0){
+      res.status(200).send({ message: "Explore All Department Query", access: true, all_department: all_department})
+    }
+    else{
+      res.status(200).send({ message: "No Department Query", access: false, all_department: []})
+    }
+
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
 
 // exports.updateAlias = async(req, res) => {
 //   try{

@@ -57,7 +57,7 @@ exports.dueDateAlarm = async (aid, type, content) => {
                 _id: `${remind?.student?.user?._id}`,
               });
               var notify = new StudentNotification({});
-              notify.notifyContent = `Admission Outstanding Fees Rs. ${valid_price} is due. Paid As Soon As Possible.`;
+              notify.notifyContent = `Admission Outstanding Fees Rs. ${valid_price} is due. Pay As Soon As Possible.`;
               notify.notifySender = `${ads_admin?.admissionAdminHead?.user}`;
               notify.notifyReceiever = `${user?._id}`;
               notify.notifyType = "Student";
@@ -69,7 +69,7 @@ exports.dueDateAlarm = async (aid, type, content) => {
               await Promise.all([user.save(), notify.save()]);
               invokeSpecificRegister(
                 "Specific Notification",
-                `Admission Outstanding Fees Rs. ${valid_price} is due. Paid As Soon As Possible.`,
+                `Admission Outstanding Fees Rs. ${valid_price} is due. Pay As Soon As Possible.`,
                 "Fees Reminder",
                 remind?.student?.user._id,
                 remind?.student?.user.deviceToken

@@ -534,6 +534,10 @@ router
 router
   .route("/validate/structure/query")
   .patch(catchAsync(Finance.renderValidateStructureQuery));
+
+router
+  .route("/:fid/all/department/query")
+  .get(catchAsync(Finance.renderFinanceDepartmentQuery));
   
 
 module.exports = router;
