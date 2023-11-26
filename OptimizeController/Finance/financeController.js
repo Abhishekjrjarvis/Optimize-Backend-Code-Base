@@ -1535,7 +1535,8 @@ exports.retrieveRemainFeeList = async (req, res) => {
     if (sorted_zero?.length > 0) {
       const fee_bind = {
         message: "Remaining Fee List", 
-        list: sorted_zero
+        list: sorted_zero,
+        search: true
       }
       const sEncrypt = await encryptionPayload(fee_bind);
       res

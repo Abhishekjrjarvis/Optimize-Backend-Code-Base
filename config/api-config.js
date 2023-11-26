@@ -68,6 +68,11 @@ const userNewV2 = require("../OptimizeRoute/User/userRoute");
 const extraNewV2 = require("../OptimizeRoute/Extra/extraRoute");
 const uploadRouteV2 = require("../OptimizeRoute/UploadContent/index");
 const departmentV2 = require("../OptimizeRoute/Department/departmentRoute");
+const filterNewV2 = require("../routes/Filterization/filterRoute");
+const instituteNewV2 = require("../routes/InstituteAdmin/instituteRoute");
+const manageV2 = require("../routes/ManageAdmin/manageRoute");
+const examRouteV2 = require("../routes/Exam/examRoute");
+const searchRouteV2 = require("../routes/Search/index");
 
 // Api Middleware Func
 
@@ -137,5 +142,10 @@ router.use("/api/v2/user", userNewV2);
 router.use("/api/v2/extra", extraNewV2);
 router.use("/api/v2/all-images", uploadRouteV2);
 router.use("/api/v2/department", departmentV2);
+router.use("/api/v2/feed/filter", filterNewV2);
+router.use("/api/v2/ins", instituteNewV2);
+router.use("/api/v2/manage/admin", manageV2);
+router.use("/api/v2/search", searchRouteV2);
+router.use("/api/v2/exam", examRouteV2);
 
 module.exports = router;
