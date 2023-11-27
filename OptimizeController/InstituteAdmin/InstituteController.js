@@ -1305,21 +1305,25 @@ exports.retrieveApproveStaffList = async (req, res) => {
 exports.retrieveApproveStudentList = async (req, res) => {
   try {
     var { id } = req.params;
-    if (req.query.limit) {
-      const page = req.query.page ? parseInt(req.query.page) : 1;
-      const limit = req.query.limit ? parseInt(req.query.limit) : 10;
-      const skip = (page - 1) * limit;
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const skip = (page - 1) * limit;
+    const { search } = req?.query
+    if(search) {
       var student_ins = await InstituteAdmin.findById({ _id: id }).select(
         "ApproveStudent insName gr_initials pending_fee_custom_filter"
       );
       var studentIns = await Student.find({
-        _id: { $in: student_ins?.ApproveStudent },
+        $and: [{ _id: { $in: student_ins?.ApproveStudent } }],
+        $or: [{ studentFirstName: { $regex: `${search}`, $options: "i"}},
+        { studentMiddleName: { $regex: `${search}`, $options: "i"}},
+        { studentLastName: { $regex: `${search}`, $options: "i"}},
+        { valid_full_name: { $regex: `${search}`, $options: "i"}},
+        { studentGRNO: { $regex: `${search}`, $options: "i"}}]
       })
         .sort({ createdAt: -1 })
-        .limit(limit)
-        .skip(skip)
         .select(
-          "studentFirstName studentMiddleName applicable_fees_pending studentGender studentCastCategory batches studentLastName photoId studentProfilePhoto studentPhoneNumber studentGRNO studentROLLNO studentAdmissionDate studentGender admissionRemainFeeCount"
+          "studentFirstName studentMiddleName studentLastName valid_full_name applicable_fees_pending studentGender studentCastCategory batches photoId studentProfilePhoto studentPhoneNumber studentGRNO studentROLLNO studentAdmissionDate admissionRemainFeeCount"
         )
         .populate({
           path: "user",
@@ -1337,6 +1341,35 @@ exports.retrieveApproveStudentList = async (req, res) => {
             select: "applicable_fees",
           },
         });
+      }
+      else{
+        var student_ins = await InstituteAdmin.findById({ _id: id }).select(
+          "ApproveStudent insName gr_initials pending_fee_custom_filter"
+        );
+        var studentIns = await Student.find({
+          _id: { $in: student_ins?.ApproveStudent },
+        })
+          .sort({ createdAt: -1 })
+          .select(
+            "studentFirstName studentMiddleName studentLastName valid_full_name applicable_fees_pending studentGender studentCastCategory batches photoId studentProfilePhoto studentPhoneNumber studentGRNO studentROLLNO studentAdmissionDate admissionRemainFeeCount"
+          )
+          .populate({
+            path: "user",
+            select: "userLegalName userEmail userPhoneNumber",
+          })
+          .populate({
+            path: "studentClass",
+            select: "className classTitle classStatus",
+          })
+          .populate({
+            path: "remainingFeeList",
+            select: "paid_fee fee_structure",
+            populate: {
+              path: "fee_structure",
+              select: "applicable_fees",
+            },
+          });
+      }
       if (studentIns) {
         // const sEncrypt = await encryptionPayload(studentIns);
         var valid_list = await applicable_pending_calc(studentIns);
@@ -1350,55 +1383,10 @@ exports.retrieveApproveStudentList = async (req, res) => {
         });
         res
           .status(200)
-          .send({ message: "All Student with limit", studentIns: valid_list });
+          .send({ message: "Without Limit", studentIns: valid_list, search: search ? true : false });
       } else {
-        res.status(404).send({ message: "Failure", studentIns: [] });
+        res.status(404).send({ message: "Failure", studentIns: [], search: search ? true : false });
       }
-    } else {
-      var student_ins = await InstituteAdmin.findById({ _id: id }).select(
-        "ApproveStudent insName gr_initials pending_fee_custom_filter"
-      );
-      var studentIns = await Student.find({
-        _id: { $in: student_ins?.ApproveStudent },
-      })
-        .sort({ createdAt: -1 })
-        .select(
-          "studentFirstName studentMiddleName studentLastName applicable_fees_pending studentGender studentCastCategory batches photoId studentProfilePhoto studentPhoneNumber studentGRNO studentROLLNO studentAdmissionDate admissionRemainFeeCount"
-        )
-        .populate({
-          path: "user",
-          select: "userLegalName userEmail userPhoneNumber",
-        })
-        .populate({
-          path: "studentClass",
-          select: "className classTitle classStatus",
-        })
-        .populate({
-          path: "remainingFeeList",
-          select: "paid_fee fee_structure",
-          populate: {
-            path: "fee_structure",
-            select: "applicable_fees",
-          },
-        });
-      if (studentIns) {
-        // const sEncrypt = await encryptionPayload(studentIns);
-        var valid_list = await applicable_pending_calc(studentIns);
-        valid_list.sort(function (st1, st2) {
-          return (
-            parseInt(
-              st1?.studentGRNO?.slice(student_ins?.gr_initials?.length)
-            ) -
-            parseInt(st2?.studentGRNO?.slice(student_ins?.gr_initials?.length))
-          );
-        });
-        res
-          .status(200)
-          .send({ message: "Without Limit", studentIns: valid_list });
-      } else {
-        res.status(404).send({ message: "Failure", studentIns: [] });
-      }
-    }
   } catch (e) {
     console.log(e);
   }

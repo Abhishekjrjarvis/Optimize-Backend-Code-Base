@@ -136,7 +136,7 @@ router.patch(
 );
 
 router.patch(
-  "/by/fees/statistics/query",
+  "/by/fees/statistics/:fid/query",
   // isLoggedIn,
   catchAsync(Filter.renderStudentFeesStatisticsQuery)
 );

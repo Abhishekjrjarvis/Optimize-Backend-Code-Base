@@ -4225,14 +4225,79 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       var collect_by_student = 0
       var pending_by_student = 0
       var collect_by_government = 0
+      var excel_list = []
       if(all_depart === "ALL"){
+        var new_departs = []
+        var new_batches = []
+        var new_masters = []
+        var new_classes = []
+        var total_fees_arr = [] 
+        var total_collect_arr = []
+        var total_pending_arr = []
+        var collect_by_student_arr = []
+        var pending_by_student_arr = []
+        var collect_by_government_arr = []
         var departs = await Department.find({ institute: finance?.institute })
+        .select("dName")
+        var batches = await Batch.find({ department: { $in: departs }})
+        var masters = await ClassMaster.find({ department: { $in: departs }})
+        var classes = await Class.find({ $and: [{ masterClassName: { $in: masters } }, { batch: { $in: batches}}]})
         var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
+        for(var dep of departs){
+          new_departs.push(dep?.dName)
+        }
+        for(var bat of batches){
+          new_batches.push(bat?.batchName)
+        }
+        for(var mast of masters){
+          new_masters.push(mast?.className)
+        }
+        for(var cls of classes){
+          new_classes.push(`${cls?.className}-${cls?.classTitle}`)
+          // for(var ele of all_student){
+            total_fees += 12
+            total_collect += 10
+            total_pending += 30
+            collect_by_student += 40
+            pending_by_student += 20
+            collect_by_government += 10
+          // }
+          total_fees_arr.push(total_fees) 
+          total_collect_arr.push(total_collect)
+          total_pending_arr.push(total_pending)
+          collect_by_student_arr.push(collect_by_student)
+          pending_by_student_arr.push(pending_by_student)
+          collect_by_government_arr.push(collect_by_government)
+          // total_fees = 0
+          // total_collect = 0
+          // total_pending = 0
+          // collect_by_student = 0
+          // pending_by_student = 0
+          // collect_by_government = 0
+        }
+        
+          excel_list.push({
+            depart_row: true,
+            batch_row: true,
+            master_row: true,
+            class_row: true,
+            departs: { custom: [...new_departs]},
+            batches: { custom: [...new_batches]},
+            masters: { custom: [...new_masters]},
+            classes: { custom: [...new_classes]},
+            total_fees: { custom: [...total_fees_arr]}, 
+            total_collect: { custom: [...total_collect_arr]},
+            total_pending: { custom: [...total_pending_arr]},
+            collect_by_student: { custom: [...collect_by_student_arr]},
+            pending_by_student: { custom: [...pending_by_student_arr]},
+            collect_by_government: { custom: [...collect_by_government_arr]},
+          })
+      res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list})
       }
       else if(all_depart === "PARTICULAR"){
-        if(batch_status === "CURRENT_BATCH"){
+        if(batch_status === "ALL_BATCH"){
           var valid_departs = await Department.findById({ _id: depart })
-          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: valid_departs?.departmentSelectBatch }, { studentClass: { $in: master }}]})
+          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: valid_departs?.batches }, { studentClass: { $in: master }}]})
         }
         else if(batch_status === "PARTICULAR_BATCH"){
           var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: batch }, { studentClass: { $in: master }}]})
@@ -4241,6 +4306,9 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       else if(all_depart === "BY_BANK"){
         var departs = await Department.find({ bank_account: bank })
         var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
+      }
+      else if(all_depart === "PARTICULAR_STUDENT"){
+        var all_student = await Student.findById({ _id: single_student })
       }
       res.status(200).send({ message: "Explore Overall View Query"})
     }
@@ -4250,15 +4318,16 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       var collect_from_students = 0
       var pending_from_students = 0
       var collect_from_gov = 0
-      var pending_from_ = 0
+      var pending_from_gov = 0
+      var excel_list = []
       if(all_depart === "ALL"){
         var departs = await Department.find({ institute: finance?.institute })
         var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
       }
       else if(all_depart === "PARTICULAR"){
-        if(batch_status === "CURRENT_BATCH"){
+        if(batch_status === "ALL_BATCH"){
           var valid_departs = await Department.findById({ _id: depart })
-          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: valid_departs?.departmentSelectBatch }, { studentClass: { $in: master }}]})
+          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: valid_departs?.batches }, { studentClass: { $in: master }}]})
         }
         else if(batch_status === "PARTICULAR_BATCH"){
           var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: batch }, { studentClass: { $in: master }}]})
@@ -4267,6 +4336,9 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       else if(all_depart === "BY_BANK"){
         var departs = await Department.find({ bank_account: bank })
         var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
+      }
+      else if(all_depart === "PARTICULAR_STUDENT"){
+        var all_student = await Student.findById({ _id: single_student })
       }
       res.status(200).send({ message: "Explore Admission View Query"})
     }
