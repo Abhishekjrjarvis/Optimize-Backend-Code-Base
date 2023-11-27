@@ -4088,6 +4088,7 @@ exports.renderStudentStatisticsQuery = async(req, res) => {
         jews_f_arr: jews_f_arr,
         ph_m_arr: ph_m_arr,
         ph_f_arr: ph_f_arr,
+        dt_m: dt_m,
         dt_f: dt_f,
         dt_m_arr: dt_m_arr,
         dt_f_arr: dt_f_arr,
@@ -4211,7 +4212,67 @@ exports.renderStudentStatisticsExcelQuery = async (req, res) => {
 
 exports.renderStudentFeesStatisticsQuery = async(req, res) => {
   try{
-    
+    const { fid } = req?.params
+    if(!fid) 
+    return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+    const { module_type } = req?.query
+    const { all_depart, batch_status, master, batch, depart, bank, single_student } = req?.body
+    var finance = await Finance.findById({ _id: fid})
+    if(module_type === "OVERALL_VIEW"){
+      var total_fees = 0
+      var total_collect = 0
+      var total_pending = 0
+      var collect_by_student = 0
+      var pending_by_student = 0
+      var collect_by_government = 0
+      if(all_depart === "ALL"){
+        var departs = await Department.find({ institute: finance?.institute })
+        var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
+      }
+      else if(all_depart === "PARTICULAR"){
+        if(batch_status === "CURRENT_BATCH"){
+          var valid_departs = await Department.findById({ _id: depart })
+          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: valid_departs?.departmentSelectBatch }, { studentClass: { $in: master }}]})
+        }
+        else if(batch_status === "PARTICULAR_BATCH"){
+          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: batch }, { studentClass: { $in: master }}]})
+        }
+      }
+      else if(all_depart === "BY_BANK"){
+        var departs = await Department.find({ bank_account: bank })
+        var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
+      }
+      res.status(200).send({ message: "Explore Overall View Query"})
+    }
+    else if (module_type === "ADMISSION_VIEW"){
+      var cancelled_count = 0
+      var total_count = 0
+      var collect_from_students = 0
+      var pending_from_students = 0
+      var collect_from_gov = 0
+      var pending_from_ = 0
+      if(all_depart === "ALL"){
+        var departs = await Department.find({ institute: finance?.institute })
+        var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
+      }
+      else if(all_depart === "PARTICULAR"){
+        if(batch_status === "CURRENT_BATCH"){
+          var valid_departs = await Department.findById({ _id: depart })
+          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: valid_departs?.departmentSelectBatch }, { studentClass: { $in: master }}]})
+        }
+        else if(batch_status === "PARTICULAR_BATCH"){
+          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: batch }, { studentClass: { $in: master }}]})
+        }
+      }
+      else if(all_depart === "BY_BANK"){
+        var departs = await Department.find({ bank_account: bank })
+        var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
+      }
+      res.status(200).send({ message: "Explore Admission View Query"})
+    }
+    else{
+      res.status(200).send({ message: "Invalid Flow / Module Type Query"})
+    }
   }
   catch(e){
     console.log(e)
