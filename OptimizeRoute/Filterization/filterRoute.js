@@ -135,5 +135,10 @@ router.patch(
   catchAsync(Filter.renderStudentStatisticsExcelQuery)
 );
 
+router.patch(
+  "/by/fees/statistics/query",
+  // isLoggedIn,
+  catchAsync(Filter.renderStudentFeesStatisticsQuery)
+);
 
 module.exports = router;

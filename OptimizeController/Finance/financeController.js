@@ -5491,7 +5491,7 @@ exports.renderNewInternalFeesQuery = async (req, res) => {
     finance.fees_count += 1
     feeData.finance = finance?._id
     feeData.feeDepartment = department._id;
-    for (let i = 0; i < ClassId.length; i++) {
+    for (let i = 0; i < ClassId?.length; i++) {
       const classes = await Class.findById({ _id: ClassId[i] });
       classes.fee.push(feeData._id);
       await classes.save();

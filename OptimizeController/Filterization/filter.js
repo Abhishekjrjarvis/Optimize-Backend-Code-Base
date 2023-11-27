@@ -4209,6 +4209,15 @@ exports.renderStudentStatisticsExcelQuery = async (req, res) => {
   }
 };
 
+exports.renderStudentFeesStatisticsQuery = async(req, res) => {
+  try{
+    
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
 exports.renderTallyPriceQuery = async (req, res) => {
   // try {
   //   var { arr } = req.body;
