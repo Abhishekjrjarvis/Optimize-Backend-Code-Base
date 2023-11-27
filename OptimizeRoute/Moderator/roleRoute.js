@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Role = require("../../OptimizeControllers/Moderator/roleController");
+const Role = require("../../OptimizeController/Moderator/roleController");
 const catchAsync = require("../../Utilities/catchAsync");
 const { isLoggedIn } = require("../../middleware");
 
