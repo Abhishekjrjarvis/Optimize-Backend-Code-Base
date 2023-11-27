@@ -4275,7 +4275,21 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
           // pending_by_student = 0
           // collect_by_government = 0
         }
-        
+        // const buildStructureObject = async (departs) => {
+        //   var obj = {};
+        //   for (let i = 0; i < departs.length; i++) {
+        //     const { HeadsName, PaidHeadFees } = departs[i];
+        //     obj[HeadsName] = PaidHeadFees;
+        //   }
+        //   return obj;
+        // };
+        // var result = await buildStructureObject(departs);
+        // for(var i = 0; i < departs of departs){
+        //   new_departs.push({
+        //     dName: dep?.dName,
+        //     dp: `${departs?.length}`
+        //   })
+        // }
           excel_list.push({
             depart_row: true,
             batch_row: true,
@@ -4350,6 +4364,55 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
     console.log(e)
   }
 }
+
+// var obj = {
+//   depart_row: true,
+//   batch_row: true,
+//   master_row: true,
+//   class_row: true,
+//   dp1: { 
+//     dName: "Physics", 
+//     batches: [{ bp1: "2021-22" , dp1: "dp1"}, {bp2: "2022-23", dp1: "dp1"}],
+//     bp1: {
+//       batchName: "2021-22",
+//       dp1: "dp1"
+//     },
+//     bp2: {
+//       batchName: "2022-23",
+//       dp1: "dp1"
+//     },
+//     masters: [{ mt1: "PY-sem1", dp1: "dp1" }, {mt2: "PY-sem2", dp1: "dp1"}],
+//     mt1: {
+//       batchName: "PY-sem1",
+//       dp1: "dp1"
+//     },
+//     mt2: {
+//       batchName: "PY-sem2",
+//       dp1: "dp1"
+//     },
+//     classes: [{c1: "PY-A", dp1: "dp1", bp1: "bp1"}, { c2: "PY-B" , dp1: "dp1", bp2: "bp2"}],
+//     c1: {
+//       className: "PY-A",
+//       total_fees: 10, 
+//       total_collect: 20,
+//       total_pending: 23,
+//       collect_by_student: 12,
+//       pending_by_student: 24,
+//       collect_by_government: 10,
+//       bp1: "bp1"
+//     },
+//     c2: {
+//       className: "PY-B",
+//       total_fees: 10, 
+//       total_collect: 20,
+//       total_pending: 23,
+//       collect_by_student: 12,
+//       pending_by_student: 24,
+//       collect_by_government: 10,
+//       bp2: "bp2"
+//     }
+//   }
+// }
 
 exports.renderTallyPriceQuery = async (req, res) => {
   // try {

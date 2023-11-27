@@ -74,6 +74,8 @@ const manageV2 = require("../OptimizeRoute/ManageAdmin/manageRoute");
 const examRouteV2 = require("../OptimizeRoute/Exam/examRoute");
 const searchRouteV2 = require("../OptimizeRoute/Search/index");
 const permissionV2 = require("../OptimizeRoute/Moderator/roleRoute");
+const adminNewV2 = require("../OptimizeRoute/SuperAdmin/adminRoute");
+const checkoutV2 = require("../OptimizeRoute/RazorPay/payCheckoutRoute");
 
 // Api Middleware Func
 
@@ -149,5 +151,7 @@ router.use("/api/v2/manage/admin", manageV2);
 router.use("/api/v2/search", searchRouteV2);
 router.use("/api/v2/exam", examRouteV2);
 router.use("/api/v2/role/permission", permissionV2);
+router.use("/api/v2/admin", adminNewV2);
+router.use("/api/v2/pay", checkoutV2);
 
 module.exports = router;
