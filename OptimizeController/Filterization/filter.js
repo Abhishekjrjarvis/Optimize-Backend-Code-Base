@@ -4315,7 +4315,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
               _id: one_batch?._id
             })
             var classes = await Class.find({ batch: one_batch?._id })
-            .select("className classTitle")
+            .select("className classTitle masterClassName")
             var custom_classes = []
             for(var cls of classes){
               custom_classes.push({
@@ -4326,7 +4326,8 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                 total_pending: 30,
                 collect_by_student: 46,
                 pending_by_student: 89,
-                collect_by_government: 90
+                collect_by_government: 90,
+                classMaster: cls?.masterClassName
               })
             }
             obs[one_batch?._id] = {
@@ -4337,7 +4338,10 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
           var master_query = []
           for(var j = 0; j < departs[i]?.departmentClassMasters?.length; j++){
             const one_master = await ClassMaster.findById({ _id: departs[i]?.departmentClassMasters[j]})
-            master_query.push(one_master?.className)
+            master_query.push({
+              masterName: one_master?.className,
+              _id: one_master?._id
+            })
           }
           new_departs.push({
             dName: departs[i]?.dName,
@@ -4347,7 +4351,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
             nest_classes: [...nest_classes]
           })
         }
-        console.log(nest_classes)
+        // console.log(nest_classes)
         var result = await buildStructureObject(new_departs);
         var new_dep_excel = [{...result}]
         var result_1 = await buildStructureObject_1(new_departs);
