@@ -4225,6 +4225,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       var collect_by_student = 0
       var pending_by_student = 0
       var collect_by_government = 0
+      var pending_from_government = 0
       var excel_list = []
       if(all_depart === "ALL"){
         var new_departs = []
@@ -4239,42 +4240,6 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
         var collect_by_government_arr = []
         var departs = await Department.find({ institute: finance?.institute })
         .select("dName batches departmentClassMasters")
-        var batches = await Batch.find({ department: { $in: departs }})
-        var masters = await ClassMaster.find({ department: { $in: departs }})
-        // var classes = await Class.find({ $and: [{ masterClassName: { $in: masters } }, { batch: { $in: batches}}]})
-        var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
-        for(var dep of departs){
-          new_departs.push(dep?.dName)
-        }
-        for(var bat of batches){
-          new_batches.push(bat?.batchName)
-        }
-        for(var mast of masters){
-          new_masters.push(mast?.className)
-        }
-        // for(var cls of classes){
-        //   new_classes.push(`${cls?.className}-${cls?.classTitle}`)
-        //   // for(var ele of all_student){
-        //     total_fees += 12
-        //     total_collect += 10
-        //     total_pending += 30
-        //     collect_by_student += 40
-        //     pending_by_student += 20
-        //     collect_by_government += 10
-        //   // }
-        //   total_fees_arr.push(total_fees) 
-        //   total_collect_arr.push(total_collect)
-        //   total_pending_arr.push(total_pending)
-        //   collect_by_student_arr.push(collect_by_student)
-        //   pending_by_student_arr.push(pending_by_student)
-        //   collect_by_government_arr.push(collect_by_government)
-        //   // total_fees = 0
-        //   // total_collect = 0
-        //   // total_pending = 0
-        //   // collect_by_student = 0
-        //   // pending_by_student = 0
-        //   // collect_by_government = 0
-        // }
         const buildStructureObject = async (departs) => {
           var obj = {};
           for (let i = 0; i < departs.length; i++) {
@@ -4310,24 +4275,42 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
           for(var j = 0; j < departs[i]?.batches?.length; j++){
             var obs = {}
             const one_batch = await Batch.findById({ _id: departs[i]?.batches[j]})
+            if(one_batch?._id){
             batch_query.push({
               batchName: one_batch?.batchName,
               _id: one_batch?._id
             })
+          }
             var classes = await Class.find({ batch: one_batch?._id })
             .select("className classTitle masterClassName")
             var custom_classes = []
             for(var cls of classes){
+              var all_student = await Student.find({ studentClass: cls?._id })
+              for(var ref of all_student){
+                var all_remain = await RemainingList.find({ student: ref?._id })
+                .populate({
+                  path: "fee_structure"
+                })
+                for(var ele of all_remain){
+                  total_fees += ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount
+                  total_collect += ele?.paid_fee + ref?.studentPaidFeeCount
+                  total_pending += ele?.remaining_fee + ref?.studentRemainingFeeCount
+                  collect_by_student += ele?.paid_by_student
+                  pending_by_student += ele?.admissionRemainFeeCount ?? 0
+                  collect_by_government += ele?.paid_by_government
+                  pending_from_government += 0
+                }
+              }
               custom_classes.push({
                 className: `${cls?.className}-${cls?.classTitle}`,
                 _id: cls?._id,
-                total_fees: 10,
-                total_collect: 23,
-                total_pending: 30,
-                collect_by_student: 46,
-                pending_by_student: 89,
-                collect_by_government: 90,
-                pending_from_government: 80,
+                total_fees: total_fees,
+                total_collect: total_collect,
+                total_pending: total_pending,
+                collect_by_student: collect_by_student,
+                pending_by_student: pending_by_student,
+                collect_by_government: collect_by_government,
+                pending_from_government: pending_from_government,
                 classMaster: cls?.masterClassName
               })
             }
@@ -4339,10 +4322,12 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
           var master_query = []
           for(var j = 0; j < departs[i]?.departmentClassMasters?.length; j++){
             const one_master = await ClassMaster.findById({ _id: departs[i]?.departmentClassMasters[j]})
+            if(one_master?._id){
             master_query.push({
               masterName: one_master?.className,
               _id: one_master?._id
             })
+          }
           }
           new_departs.push({
             dName: departs[i]?.dName,
