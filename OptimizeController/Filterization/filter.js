@@ -4238,10 +4238,10 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
         var pending_by_student_arr = []
         var collect_by_government_arr = []
         var departs = await Department.find({ institute: finance?.institute })
-        .select("dName")
+        .select("dName batches departmentClassMasters")
         var batches = await Batch.find({ department: { $in: departs }})
         var masters = await ClassMaster.find({ department: { $in: departs }})
-        var classes = await Class.find({ $and: [{ masterClassName: { $in: masters } }, { batch: { $in: batches}}]})
+        // var classes = await Class.find({ $and: [{ masterClassName: { $in: masters } }, { batch: { $in: batches}}]})
         var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
         for(var dep of departs){
           new_departs.push(dep?.dName)
@@ -4252,59 +4252,122 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
         for(var mast of masters){
           new_masters.push(mast?.className)
         }
-        for(var cls of classes){
-          new_classes.push(`${cls?.className}-${cls?.classTitle}`)
-          // for(var ele of all_student){
-            total_fees += 12
-            total_collect += 10
-            total_pending += 30
-            collect_by_student += 40
-            pending_by_student += 20
-            collect_by_government += 10
-          // }
-          total_fees_arr.push(total_fees) 
-          total_collect_arr.push(total_collect)
-          total_pending_arr.push(total_pending)
-          collect_by_student_arr.push(collect_by_student)
-          pending_by_student_arr.push(pending_by_student)
-          collect_by_government_arr.push(collect_by_government)
-          // total_fees = 0
-          // total_collect = 0
-          // total_pending = 0
-          // collect_by_student = 0
-          // pending_by_student = 0
-          // collect_by_government = 0
-        }
-        // const buildStructureObject = async (departs) => {
-        //   var obj = {};
-        //   for (let i = 0; i < departs.length; i++) {
-        //     const { HeadsName, PaidHeadFees } = departs[i];
-        //     obj[HeadsName] = PaidHeadFees;
-        //   }
-        //   return obj;
-        // };
-        // var result = await buildStructureObject(departs);
-        // for(var i = 0; i < departs of departs){
-        //   new_departs.push({
-        //     dName: dep?.dName,
-        //     dp: `${departs?.length}`
-        //   })
+        // for(var cls of classes){
+        //   new_classes.push(`${cls?.className}-${cls?.classTitle}`)
+        //   // for(var ele of all_student){
+        //     total_fees += 12
+        //     total_collect += 10
+        //     total_pending += 30
+        //     collect_by_student += 40
+        //     pending_by_student += 20
+        //     collect_by_government += 10
+        //   // }
+        //   total_fees_arr.push(total_fees) 
+        //   total_collect_arr.push(total_collect)
+        //   total_pending_arr.push(total_pending)
+        //   collect_by_student_arr.push(collect_by_student)
+        //   pending_by_student_arr.push(pending_by_student)
+        //   collect_by_government_arr.push(collect_by_government)
+        //   // total_fees = 0
+        //   // total_collect = 0
+        //   // total_pending = 0
+        //   // collect_by_student = 0
+        //   // pending_by_student = 0
+        //   // collect_by_government = 0
         // }
+        const buildStructureObject = async (departs) => {
+          var obj = {};
+          for (let i = 0; i < departs.length; i++) {
+            const { dp, dName } = departs[i];
+            obj[dp] = dName;
+          }
+          return obj;
+        };
+        const buildStructureObject_1 = async (departs) => {
+          var obj = {};
+          for (let i = 0; i < departs.length; i++) {
+            const { dp, dName, batch_query, master_query, nest_classes } = departs[i];
+            // var nest_obj = Object.assign({}, [...nest_classes])
+            obj[dp] = {
+              dName: dName,
+              batches: batch_query,
+              masters: master_query,
+              nest_classes
+              // batches: batch_query?.map((val, index) => {
+              //   const { bp, batchName, dp } = val;
+              //   nest_obj[bp] = batchName
+              //   nest_obj[dp] = dp
+              //   nest_obj = {}
+              //   return nest_obj
+              // })
+            };
+          }
+          return obj;
+        };
+        var nest_classes = []
+        for(var i = 0; i < departs?.length; i++){
+          var batch_query = []
+          for(var j = 0; j < departs[i]?.batches?.length; j++){
+            var obs = {}
+            const one_batch = await Batch.findById({ _id: departs[i]?.batches[j]})
+            batch_query.push({
+              batchName: one_batch?.batchName,
+              _id: one_batch?._id
+            })
+            var classes = await Class.find({ batch: one_batch?._id })
+            .select("className classTitle")
+            var custom_classes = []
+            for(var cls of classes){
+              custom_classes.push({
+                className: `${cls?.className}-${cls?.classTitle}`,
+                _id: cls?._id,
+                total_fees: 10,
+                total_collect: 23,
+                total_pending: 30,
+                collect_by_student: 46,
+                pending_by_student: 89,
+                collect_by_government: 90
+              })
+            }
+            obs[one_batch?._id] = {
+              classes: custom_classes
+            }
+            nest_classes.push({...obs})
+          }
+          var master_query = []
+          for(var j = 0; j < departs[i]?.departmentClassMasters?.length; j++){
+            const one_master = await ClassMaster.findById({ _id: departs[i]?.departmentClassMasters[j]})
+            master_query.push(one_master?.className)
+          }
+          new_departs.push({
+            dName: departs[i]?.dName,
+            dp: `dp${i+1}`,
+            batch_query: [...batch_query],
+            master_query: [...master_query],
+            nest_classes: [...nest_classes]
+          })
+        }
+        console.log(nest_classes)
+        var result = await buildStructureObject(new_departs);
+        var new_dep_excel = [{...result}]
+        var result_1 = await buildStructureObject_1(new_departs);
           excel_list.push({
             depart_row: true,
             batch_row: true,
             master_row: true,
             class_row: true,
-            departs: { custom: [...new_departs]},
-            batches: { custom: [...new_batches]},
-            masters: { custom: [...new_masters]},
-            classes: { custom: [...new_classes]},
-            total_fees: { custom: [...total_fees_arr]}, 
-            total_collect: { custom: [...total_collect_arr]},
-            total_pending: { custom: [...total_pending_arr]},
-            collect_by_student: { custom: [...collect_by_student_arr]},
-            pending_by_student: { custom: [...pending_by_student_arr]},
-            collect_by_government: { custom: [...collect_by_government_arr]},
+            departs: new_dep_excel,
+            ...result_1
+            // departs: { custom: [...new_departs]},
+            // batches: { custom: [...new_batches]},
+            // masters: { custom: [...new_masters]},
+            // classes: { custom: [...new_classes]},
+            // total_fees: { custom: [...total_fees_arr]}, 
+            // total_collect: { custom: [...total_collect_arr]},
+            // total_pending: { custom: [...total_pending_arr]},
+            // collect_by_student: { custom: [...collect_by_student_arr]},
+            // pending_by_student: { custom: [...pending_by_student_arr]},
+            // collect_by_government: { custom: [...collect_by_government_arr]},
           })
       res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list})
       }
@@ -4324,7 +4387,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       else if(all_depart === "PARTICULAR_STUDENT"){
         var all_student = await Student.findById({ _id: single_student })
       }
-      res.status(200).send({ message: "Explore Overall View Query"})
+      // res.status(200).send({ message: "Explore Overall View Query"})
     }
     else if (module_type === "ADMISSION_VIEW"){
       var cancelled_count = 0
@@ -4354,7 +4417,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       else if(all_depart === "PARTICULAR_STUDENT"){
         var all_student = await Student.findById({ _id: single_student })
       }
-      res.status(200).send({ message: "Explore Admission View Query"})
+      // res.status(200).send({ message: "Explore Admission View Query"})
     }
     else{
       res.status(200).send({ message: "Invalid Flow / Module Type Query"})
@@ -4365,54 +4428,54 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
   }
 }
 
-// var obj = {
-//   depart_row: true,
-//   batch_row: true,
-//   master_row: true,
-//   class_row: true,
-//   dp1: { 
-//     dName: "Physics", 
-//     batches: [{ bp1: "2021-22" , dp1: "dp1"}, {bp2: "2022-23", dp1: "dp1"}],
-//     bp1: {
-//       batchName: "2021-22",
-//       dp1: "dp1"
-//     },
-//     bp2: {
-//       batchName: "2022-23",
-//       dp1: "dp1"
-//     },
-//     masters: [{ mt1: "PY-sem1", dp1: "dp1" }, {mt2: "PY-sem2", dp1: "dp1"}],
-//     mt1: {
-//       batchName: "PY-sem1",
-//       dp1: "dp1"
-//     },
-//     mt2: {
-//       batchName: "PY-sem2",
-//       dp1: "dp1"
-//     },
-//     classes: [{c1: "PY-A", dp1: "dp1", bp1: "bp1"}, { c2: "PY-B" , dp1: "dp1", bp2: "bp2"}],
-//     c1: {
-//       className: "PY-A",
-//       total_fees: 10, 
-//       total_collect: 20,
-//       total_pending: 23,
-//       collect_by_student: 12,
-//       pending_by_student: 24,
-//       collect_by_government: 10,
-//       bp1: "bp1"
-//     },
-//     c2: {
-//       className: "PY-B",
-//       total_fees: 10, 
-//       total_collect: 20,
-//       total_pending: 23,
-//       collect_by_student: 12,
-//       pending_by_student: 24,
-//       collect_by_government: 10,
-//       bp2: "bp2"
-//     }
-//   }
-// }
+var obj = {
+  depart_row: true,
+  batch_row: true,
+  master_row: true,
+  class_row: true,
+  dp1: { 
+    dName: "Physics", 
+    batches: [{ bp1: "2021-22" , dp1: "dp1"}, {bp2: "2022-23", dp1: "dp1"}],
+    bp1: {
+      batchName: "2021-22",
+      dp1: "dp1"
+    },
+    bp2: {
+      batchName: "2022-23",
+      dp1: "dp1"
+    },
+    masters: [{ mt1: "PY-sem1", dp1: "dp1" }, {mt2: "PY-sem2", dp1: "dp1"}],
+    mt1: {
+      batchName: "PY-sem1",
+      dp1: "dp1"
+    },
+    mt2: {
+      batchName: "PY-sem2",
+      dp1: "dp1"
+    },
+    classes: [{c1: "PY-A", dp1: "dp1", bp1: "bp1"}, { c2: "PY-B" , dp1: "dp1", bp2: "bp2"}],
+    c1: {
+      className: "PY-A",
+      total_fees: 10, 
+      total_collect: 20,
+      total_pending: 23,
+      collect_by_student: 12,
+      pending_by_student: 24,
+      collect_by_government: 10,
+      bp1: "bp1"
+    },
+    c2: {
+      className: "PY-B",
+      total_fees: 10, 
+      total_collect: 20,
+      total_pending: 23,
+      collect_by_student: 12,
+      pending_by_student: 24,
+      collect_by_government: 10,
+      bp2: "bp2"
+    }
+  }
+}
 
 exports.renderTallyPriceQuery = async (req, res) => {
   // try {
