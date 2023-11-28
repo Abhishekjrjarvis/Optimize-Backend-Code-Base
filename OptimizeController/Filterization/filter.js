@@ -4327,6 +4327,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                 collect_by_student: 46,
                 pending_by_student: 89,
                 collect_by_government: 90,
+                pending_from_government: 80,
                 classMaster: cls?.masterClassName
               })
             }
