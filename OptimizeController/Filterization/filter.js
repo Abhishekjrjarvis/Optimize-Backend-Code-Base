@@ -4358,16 +4358,6 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
             class_row: true,
             departs: new_dep_excel,
             ...result_1
-            // departs: { custom: [...new_departs]},
-            // batches: { custom: [...new_batches]},
-            // masters: { custom: [...new_masters]},
-            // classes: { custom: [...new_classes]},
-            // total_fees: { custom: [...total_fees_arr]}, 
-            // total_collect: { custom: [...total_collect_arr]},
-            // total_pending: { custom: [...total_pending_arr]},
-            // collect_by_student: { custom: [...collect_by_student_arr]},
-            // pending_by_student: { custom: [...pending_by_student_arr]},
-            // collect_by_government: { custom: [...collect_by_government_arr]},
           })
       res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list})
       }
