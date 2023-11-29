@@ -566,6 +566,11 @@ const financeSchema = new mongoose.Schema(
         type: Boolean,
         default: true
       }
+    },
+    fees_statistics_filter: {
+      batch_level: [],
+      department_level: [],
+      bank_level: []
     }
   },
   { timestamps: true }

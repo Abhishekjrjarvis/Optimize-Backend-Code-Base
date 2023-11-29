@@ -141,7 +141,7 @@ router.patch(
   catchAsync(Filter.renderStudentFeesStatisticsQuery)
 );
 
-router.patch(
+router.get(
   "/by/overall/fees/statistics/:fid/query",
   // isLoggedIn,
   catchAsync(Filter.renderOverallStudentFeesStatisticsQuery)

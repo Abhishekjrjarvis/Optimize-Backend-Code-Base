@@ -4394,7 +4394,17 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
     var pending_by_student = 0
     var collect_by_government = 0
     var pending_from_government = 0
+    var incomes = 0
+    var expenses = 0
+    var total_deposits = 0
+    var excess_fees = 0
     const one_finance = await Finance.findById({ _id: fid })
+    .populate({
+      path: "deposit_linked_head"
+    })
+    .populate({
+      path: "deposit_hostel_linked_head"
+    })
     const all_student = await Student.find({ $and: [{ institute: one_finance?.institute }, { studentStatus: "Approved"}]})
     for(var ref of all_student){
       var all_remain = await RemainingList.find({ student: ref?._id })
@@ -4411,19 +4421,28 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
         pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
       }
     }
+    incomes += one_finance?.financeIncomeCashBalance + one_finance?.financeIncomeBankBalance
+    expenses += one_finance?.financeExpenseCashBalance + one_finance?.financeExpenseBankBalance
+    total_deposits += one_finance?.deposit_linked_head?.master?.deposit_amount + one_finance?.deposit_hostel_linked_head?.master?.deposit_amount
+    excess_fees += one_finance?.deposit_linked_head?.master?.refund_amount + one_finance?.deposit_hostel_linked_head?.master?.refund_amount
 
     const fetch_obj = {
       message: "Refetched Overall Data For Finance Master Query", 
       access: true, 
-      total_fees,
-      total_collect,
-      total_pending,
-      collect_by_student,
-      pending_by_student,
-      collect_by_government,
-      pending_from_government,
+      total_fees: total_fees,
+      total_collect: total_collect,
+      total_pending: total_pending,
+      collect_by_student: collect_by_student,
+      pending_by_student: pending_by_student,
+      collect_by_government: collect_by_government,
+      pending_from_government: pending_from_government,
       last_update: new Date(),
-      loading_status: false
+      loading_status: false,
+      incomes: incomes,
+      expenses: expenses,
+      total_deposits: total_deposits,
+      excess_fees: excess_fees,
+      fees_statistics_filter: fees_statistics_filter
     }
 
     const fetch_encrypt = await encryptionPayload(fetch_obj)
