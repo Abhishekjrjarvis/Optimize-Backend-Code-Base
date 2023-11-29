@@ -864,7 +864,8 @@ exports.getUserPassword = async (req, res) => {
   try {
     const { id } = req.params;
     const { userPassword, userRePassword } = req.body;
-    const user = await User.findById({ _id: id });
+    const user = await User.findById({ _id: id })
+    .select("username userPassword userLegalName profilePhoto")
     const genUserPass = bcrypt.genSaltSync(12);
     const hashUserPass = bcrypt.hashSync(req.body.userPassword, genUserPass);
     if (user) {
@@ -967,7 +968,7 @@ exports.forgotPasswordVerifyOtp = async (req, res) => {
       ) {
         const otp_encrypt = {
           message: "Otp verified", 
-          user: user, 
+          user: user?._id, 
           access: true
         }
         const oEncrypt = await encryptionPayload(otp_encrypt);
@@ -986,7 +987,7 @@ exports.forgotPasswordVerifyOtp = async (req, res) => {
       ) {
         const otp_encrypt = {
           message: "Otp verified", 
-          institute: institute, 
+          institute: institute?._id, 
           access: true
         }
         const oEncrypt = await encryptionPayload(otp_encrypt);
@@ -1018,7 +1019,7 @@ exports.getNewPassword = async (req, res) => {
         await user.save();
         const otp_encrypt = {
           message: "Password Changed Successfully", 
-          user: user
+          user: user?._id
         }
         const nEncrypt = await encryptionPayload(otp_encrypt);
         res
@@ -1037,7 +1038,7 @@ exports.getNewPassword = async (req, res) => {
         await institute.save();
         const otp_encrypt = {
           message: "Password Changed Successfully", 
-          institute: institute
+          institute: institute?._id
         }
         const nEncrypt = await encryptionPayload(otp_encrypt);
         res
@@ -1217,9 +1218,15 @@ module.exports.authentication = async (req, res) => {
               user?._id,
               user?.userPassword
             );
+            const custom_user = {
+              username: user?.username,
+              userLegalName: user?.userLegalName,
+              profilePhoto: user?.profilePhoto,
+              _id: user?._id
+            }
             const admin_encrypt = {
               token: `Bearer ${token}`,
-              user: user,
+              user: custom_user,
               login: true,
             }
             const loginEncrypt = await encryptionPayload(admin_encrypt);
@@ -1230,9 +1237,15 @@ module.exports.authentication = async (req, res) => {
               user?._id,
               user?.userPassword
             );
+            const custom_user = {
+              username: user?.username,
+              userLegalName: user?.userLegalName,
+              profilePhoto: user?.profilePhoto,
+              _id: user?._id
+            }
             const admin_encrypt = {
               token: `Bearer ${token}`,
-              user: user,
+              user: custom_user,
               login: true,
               is_developer: user?.is_developer,
             }
