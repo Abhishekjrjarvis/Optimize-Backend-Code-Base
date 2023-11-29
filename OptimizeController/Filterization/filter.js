@@ -4442,7 +4442,7 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
       expenses: expenses,
       total_deposits: total_deposits,
       excess_fees: excess_fees,
-      fees_statistics_filter: fees_statistics_filter
+      fees_statistics_filter: one_finance?.fees_statistics_filter
     }
 
     const fetch_encrypt = await encryptionPayload(fetch_obj)
