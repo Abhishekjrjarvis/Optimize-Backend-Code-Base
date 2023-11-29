@@ -4440,7 +4440,7 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
       loading_status: false,
       incomes: incomes,
       expenses: expenses,
-      total_deposits: total_deposits,
+      total_deposits: total_deposits ?? 0,
       excess_fees: excess_fees,
       fees_statistics_filter: one_finance?.fees_statistics_filter
     }
