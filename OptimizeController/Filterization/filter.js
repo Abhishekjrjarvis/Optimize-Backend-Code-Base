@@ -43,6 +43,7 @@ const RePay = require("../../models/Return/RePay");
 const invokeSpecificRegister = require("../../Firebase/specific");
 const BankAccount = require("../../models/Finance/BankAccount");
 const Admin = require("../../models/superAdmin");
+const encryptionPayload = require("../../Utilities/Encrypt/payload");
 
 var trendingQuery = (trends, cat, type, page) => {
   if (cat !== "" && page === 1) {
@@ -4229,15 +4230,6 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       var excel_list = []
       if(all_depart === "ALL"){
         var new_departs = []
-        var new_batches = []
-        var new_masters = []
-        var new_classes = []
-        var total_fees_arr = [] 
-        var total_collect_arr = []
-        var total_pending_arr = []
-        var collect_by_student_arr = []
-        var pending_by_student_arr = []
-        var collect_by_government_arr = []
         var departs = await Department.find({ institute: finance?.institute })
         .select("dName batches departmentClassMasters")
         const buildStructureObject = async (departs) => {
@@ -4298,7 +4290,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                   collect_by_student += ele?.paid_by_student
                   pending_by_student += ele?.admissionRemainFeeCount ?? 0
                   collect_by_government += ele?.paid_by_government
-                  pending_from_government += 0
+                  pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
                 }
               }
               custom_classes.push({
@@ -4351,23 +4343,6 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
           })
       res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list})
       }
-      else if(all_depart === "PARTICULAR"){
-        if(batch_status === "ALL_BATCH"){
-          var valid_departs = await Department.findById({ _id: depart })
-          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: valid_departs?.batches }, { studentClass: { $in: master }}]})
-        }
-        else if(batch_status === "PARTICULAR_BATCH"){
-          var all_student = await Student.find({ $and: [{ department: valid_departs?._id }, { batches: batch }, { studentClass: { $in: master }}]})
-        }
-      }
-      else if(all_depart === "BY_BANK"){
-        var departs = await Department.find({ bank_account: bank })
-        var all_student = await Student.find({ $and: [{ department: { $in: departs }}]})
-      }
-      else if(all_depart === "PARTICULAR_STUDENT"){
-        var all_student = await Student.findById({ _id: single_student })
-      }
-      // res.status(200).send({ message: "Explore Overall View Query"})
     }
     else if (module_type === "ADMISSION_VIEW"){
       var cancelled_count = 0
@@ -4408,52 +4383,56 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
   }
 }
 
-var obj = {
-  depart_row: true,
-  batch_row: true,
-  master_row: true,
-  class_row: true,
-  dp1: { 
-    dName: "Physics", 
-    batches: [{ bp1: "2021-22" , dp1: "dp1"}, {bp2: "2022-23", dp1: "dp1"}],
-    bp1: {
-      batchName: "2021-22",
-      dp1: "dp1"
-    },
-    bp2: {
-      batchName: "2022-23",
-      dp1: "dp1"
-    },
-    masters: [{ mt1: "PY-sem1", dp1: "dp1" }, {mt2: "PY-sem2", dp1: "dp1"}],
-    mt1: {
-      batchName: "PY-sem1",
-      dp1: "dp1"
-    },
-    mt2: {
-      batchName: "PY-sem2",
-      dp1: "dp1"
-    },
-    classes: [{c1: "PY-A", dp1: "dp1", bp1: "bp1"}, { c2: "PY-B" , dp1: "dp1", bp2: "bp2"}],
-    c1: {
-      className: "PY-A",
-      total_fees: 10, 
-      total_collect: 20,
-      total_pending: 23,
-      collect_by_student: 12,
-      pending_by_student: 24,
-      collect_by_government: 10,
-      bp1: "bp1"
-    },
-    c2: {
-      className: "PY-B",
-      total_fees: 10, 
-      total_collect: 20,
-      total_pending: 23,
-      collect_by_student: 12,
-      pending_by_student: 24,
-      collect_by_government: 10,
-      bp2: "bp2"
+exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
+  try{
+    const { fid } = req?.params
+    if(!fid) return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+    var total_fees = 0
+    var total_collect = 0
+    var total_pending = 0
+    var collect_by_student = 0
+    var pending_by_student = 0
+    var collect_by_government = 0
+    var pending_from_government = 0
+    const one_finance = await Finance.findById({ _id: fid })
+    const all_student = await Student.find({ $and: [{ institute: one_finance?.institute }, { studentStatus: "Approved"}]})
+    for(var ref of all_student){
+      var all_remain = await RemainingList.find({ student: ref?._id })
+      .populate({
+        path: "fee_structure"
+      })
+      for(var ele of all_remain){
+        total_fees += ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount
+        total_collect += ele?.paid_fee + ref?.studentPaidFeeCount
+        total_pending += ele?.remaining_fee + ref?.studentRemainingFeeCount
+        collect_by_student += ele?.paid_by_student
+        pending_by_student += ele?.admissionRemainFeeCount ?? 0
+        collect_by_government += ele?.paid_by_government
+        pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+      }
     }
+
+    const fetch_obj = {
+      message: "Refetched Overall Data For Finance Master Query", 
+      access: true, 
+      total_fees,
+      total_collect,
+      total_pending,
+      collect_by_student,
+      pending_by_student,
+      collect_by_government,
+      pending_from_government,
+      last_update: new Date(),
+      loading_status: false
+    }
+
+    const fetch_encrypt = await encryptionPayload(fetch_obj)
+    res.status(200).send({ 
+      encrypt: fetch_encrypt
+    })
+  }
+  catch(e){
+    console.log(e)
   }
 }
 

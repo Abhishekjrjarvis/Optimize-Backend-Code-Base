@@ -141,4 +141,10 @@ router.patch(
   catchAsync(Filter.renderStudentFeesStatisticsQuery)
 );
 
+router.patch(
+  "/by/overall/fees/statistics/:fid/query",
+  // isLoggedIn,
+  catchAsync(Filter.renderOverallStudentFeesStatisticsQuery)
+);
+
 module.exports = router;
