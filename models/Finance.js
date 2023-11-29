@@ -569,8 +569,15 @@ const financeSchema = new mongoose.Schema(
     },
     fees_statistics_filter: {
       batch_level: [],
+      batch_all: {
+        type: String
+      },
       department_level: [],
-      bank_level: []
+      department_all: {
+        type: String
+      },
+      bank_level: [],
+      master_level: []
     }
   },
   { timestamps: true }
