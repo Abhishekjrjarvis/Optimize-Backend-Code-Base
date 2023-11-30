@@ -235,6 +235,18 @@ router.get(
 );
 
 router.get(
+  "/:uid/all/application/query",
+  // isLoggedIn,
+  catchAsync(User.retrieveUserAllApplicationQuery)
+);
+
+router.get(
+  "/:uid/all/:aid/application/query",
+  // isLoggedIn,
+  catchAsync(User.retrieveUserOneApplicationQuery)
+);
+
+router.get(
   "/:uid/application/status",
   isLoggedIn,
   catchAsync(User.retrieveUserApplicationStatus)

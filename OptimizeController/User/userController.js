@@ -2337,6 +2337,91 @@ exports.retrieveUserDepartmentChat = async (req, res) => {
   }
 };
 
+exports.retrieveUserAllApplicationQuery = async(req, res) => {
+  try{
+    const { uid } = req?.params
+    if(!uid) return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+
+    var one_user = await User.findById({ _id: uid })
+    var all_apps = await NewApplication.find({ _id: { $in: one_user?.applyApplication }})
+    .select("applicationName admissionAdmin applicationStatus")
+    .populate({
+      path: "admissionAdmin",
+      select: "institute",
+      populate: {
+        path: "institute",
+        select: "insName name insProfilePhoto photoId"
+      }
+    })
+
+    if(all_apps?.length > 0){
+      res.status(200).send({ message: "Explore All Applied Application Query", access: true, all_apps: all_apps})
+    }
+    else{
+      res.status(200).send({ message: "No Applied Application Query", access: false, all_apps: []})
+    }
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
+exports.retrieveUserOneApplicationQuery = async(req, res) => {
+  try {
+    const { uid, aid } = req.params;
+    var user = await User.findById({ _id: uid })
+
+    var app_status = await Status.find({ $and: [{ _id: { $in: user?.applicationStatus}}, { applicationId: aid }]})
+    .sort({ createdAt: -1})
+    .populate({
+      path: "applicationId",
+          populate: {
+            path: "applicationUnit",
+            select: "hostel hostel_unit_name",
+            populate: {
+              path: "hostel",
+              select: "bank_account",
+              populate: {
+                path: "bank_account",
+              },
+            },
+          },
+        }
+    )
+      .populate({
+        path: "instituteId",
+        select: "insName name photoId insProfilePhoto",
+      })
+      .populate({
+        path: "feeStructure hostel_fee_structure",
+          select:
+            "one_installments total_admission_fees applicable_fees structure_name structure_month two_installments three_installments four_installments five_installments six_installments seven_installments eight_installments nine_installments ten_installments eleven_installments tweleve_installments",
+          populate: {
+            path: "category_master",
+            select: "category_name",
+          },
+      })
+      .populate({
+        path: "bank_account",
+      })
+      .populate({
+        path: "fee_receipt",
+      })
+      .populate({
+        path: "student",
+        select:
+          "studentFirstName studentMiddleName studentLastName valid_full_name studentStatus application_print",
+      });
+    // const appEncrypt = await encryptionPayload(user.applicationStatus);
+    res.status(200).send({
+      message: "user Application Status",
+      status: app_status,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 exports.retrieveUserApplicationStatus = async (req, res) => {
   try {
     var options = { sort: { createdAt: "-1" } };

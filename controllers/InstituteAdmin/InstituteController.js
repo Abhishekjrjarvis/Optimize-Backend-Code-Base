@@ -5381,13 +5381,59 @@ exports.renderStats = async (req, res) => {
         message: "There is a bug need to fixed immediately 😡",
         access: false,
       });
-    const stats = await InstituteAdmin.findById({ _id: id }).select(
-      "departmentCount staffCount studentCount insProfileCoverPhoto insProfilePhoto un_approved_student_count"
-    );
+      var m_u = 3
+      const stats = await InstituteAdmin.findById({ _id: id }).select(
+        "departmentCount staffCount studentCount insProfileCoverPhoto insProfilePhoto un_approved_student_count financeStatus admissionStatus transportStatus hostelStatus sportClassStatus sportStatus eventManagerStatus careerStatus tenderStatus aluminiStatus libraryActivate"
+      );
+      var all_classes = await Class.find({ institute: stats?._id})
+      if(stats?.financeStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.admissionStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.transportStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.hostelStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.sportClassStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.sportStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.eventManagerStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.careerStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.tenderStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.aluminiStatus === "Enable"){
+        m_u += 1
+      }
+      if(stats?.libraryActivate === "Enable"){
+        m_u += 1
+      }
+      var custom_stats = {
+        departmentCount: stats?.departmentCount,
+        staffCount: stats?.staffCount,
+        studentCount: stats?.studentCount,
+        insProfileCoverPhoto: stats?.insProfileCoverPhoto,
+        insProfilePhoto: stats?.insProfilePhoto,
+        un_approved_student_count: stats?.un_approved_student_count,
+        classCount: all_classes?.length ?? 0,
+        module_use: `${m_u}/14`,
+        _id: stats?._id
+      }
     // const statsEncrypt = await encryptionPayload(stats);
     res.status(200).send({
       message: "Check some stats 😀",
-      stats,
+      stats: custom_stats,
       access: true,
     });
   } catch (e) {
