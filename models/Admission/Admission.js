@@ -289,6 +289,10 @@ const admissionAdminSchema = new mongoose.Schema({
       type: Boolean,
       default: true
     },
+    member_module_unique: {
+      type: String,
+      unique: true
+    }
   }
 });
 

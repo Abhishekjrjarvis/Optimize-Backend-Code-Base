@@ -578,6 +578,10 @@ const financeSchema = new mongoose.Schema(
       },
       bank_level: [],
       master_level: []
+    },
+    member_module_unique: {
+      type: String,
+      unique: true
     }
   },
   { timestamps: true }

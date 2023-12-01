@@ -283,6 +283,10 @@ const classSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  member_module_unique: {
+    type: String,
+    unique: true
+  }
 });
 
 const Class = mongoose.model("Class", classSchema);

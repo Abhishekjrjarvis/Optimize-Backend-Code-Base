@@ -462,6 +462,10 @@ const staffSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Staff"
   },
+  member_module_unique: {
+    type: String,
+    unique: true
+  }
 });
 
 const Staff = mongoose.model("Staff", staffSchema);

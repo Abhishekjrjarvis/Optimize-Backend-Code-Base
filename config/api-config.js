@@ -76,6 +76,9 @@ const searchRouteV2 = require("../OptimizeRoute/Search/index");
 const permissionV2 = require("../OptimizeRoute/Moderator/roleRoute");
 const adminNewV2 = require("../OptimizeRoute/SuperAdmin/adminRoute");
 const checkoutV2 = require("../OptimizeRoute/RazorPay/payCheckoutRoute");
+const urlV2 = require("../OptimizeRoute/URL/shortUrlRoute");
+const availNewV2 = require("../OptimizeRoute/Attendence/indexRoute");
+const feesNewV2 = require("../OptimizeRoute/Fees/feesRoute");
 
 // Api Middleware Func
 
@@ -153,5 +156,8 @@ router.use("/api/v2/exam", examRouteV2);
 router.use("/api/v2/role/permission", permissionV2);
 router.use("/api/v2/admin", adminNewV2);
 router.use("/api/v2/pay", checkoutV2);
+router.use("/api/v2/url", urlV2);
+router.use("/api/v2/attendance", availNewV2);
+router.use("/api/v2/fees", feesNewV2);
 
 module.exports = router;
