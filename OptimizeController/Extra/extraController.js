@@ -1165,18 +1165,18 @@ exports.retrieveActiveMemberRole = async (req, res) => {
       const active_staff = await Staff.findOne({
         _id: active_user?.active_member_role,
       })
-        .select("_id")
+        .select("_id staffROLLNO staffStatus")
         .populate({
           path: "institute",
-          select: "insName insProfilePhoto",
+          select: "insName insProfilePhoto alias_pronounciation",
         });
       const active_student = await Student.findOne({
         _id: active_user?.active_member_role,
       })
-        .select("_id")
+        .select("_id studentGRNO studentROLLNO studentStatus")
         .populate({
           path: "institute",
-          select: "insName insProfilePhoto",
+          select: "insName insProfilePhoto alias_pronounciation",
         });
       if (active_staff) {
         res.status(200).send({
@@ -1185,6 +1185,7 @@ exports.retrieveActiveMemberRole = async (req, res) => {
             activeRole: active_staff?._id,
             institute: active_staff?.institute ? active_staff?.institute : "",
             member: "Staff",
+            active_role_data: active_staff
           },
           active: true,
         });
@@ -1197,6 +1198,7 @@ exports.retrieveActiveMemberRole = async (req, res) => {
               ? active_student?.institute
               : "",
             member: "Student",
+            active_role_data: active_student
           },
           active: true,
         });

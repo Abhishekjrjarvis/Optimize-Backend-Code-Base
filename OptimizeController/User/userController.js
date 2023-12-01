@@ -2965,6 +2965,280 @@ exports.renderMode = async (req, res) => {
   }
 };
 
+exports.retrieveUserStatsQuery = async(req, res) => {
+  try{
+    const { uid } = req?.params
+    if(!uid) return res.status(200).send({ message: "Their is a bug need to fixed immediately", access: false})
+
+    var one_user = await User.findById({ _id: uid })
+    var custom_obj = {
+      message: "Explore All User Stats Query", 
+      access: true,
+      followerCount: one_user?.followerCount,
+      followingUICount: one_user?.followingUICount,
+      circleCount: one_user?.circleCount,
+      postCount: one_user?.postCount,
+      questionCount: one_user?.questionCount,
+      answerQuestionCount: one_user?.answerQuestionCount,
+      poll_Count: one_user?.poll_Count
+    }
+    var custom_encrypt = await encryptionPayload(custom_obj)
+    res.status(200).send({ encrypt: custom_encrypt })
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
+exports.retrievePreciseStaffDesignationArray = async (req, res) => {
+  try {
+    const { sid } = req.params;
+      var staff = await Staff.findById({ _id: sid })
+        .select(
+          "staffDesignationCount active_designation mentorDepartment hostelDepartment hostelUnitDepartment staffDepartment staffClass staffSubject staffStatus staffROLLNO"
+        )
+        .populate({
+          path: "staffDepartment",
+          select: "dName dTitle",
+          populate: {
+            path: "departmentSelectBatch",
+            select: "batchName batchStatus",
+          },
+        })
+        .populate({
+          path: "staffClass",
+          select: "className classTitle classStatus classHeadTitle",
+          populate: {
+            path: "batch",
+            select: "batchName batchStatus",
+          },
+        })
+        .populate({
+          path: "staffSubject",
+          select:
+            "subjectName subjectTitle subjectStatus selected_batch_query subject_category subjectOptional",
+          populate: {
+            path: "class",
+            select: "className classTitle classStatus classHeadTitle",
+            populate: {
+              path: "batch",
+              select: "batchName batchStatus",
+            },
+          },
+        })
+        .populate({
+          path: "staffSubject",
+          select:
+            "subjectName subjectTitle subjectStatus selected_batch_query subject_category subjectOptional",
+          populate: {
+            path: "selected_batch_query",
+            select: "batchName batchStatus",
+          },
+        })
+        .populate({
+          path: "institute",
+          select:
+            "insName photoId insProfilePhoto student_section_form_show_query",
+        })
+        .populate({
+          path: "user",
+          select:
+            "userLegalName userPhoneNumber userEmail photoId profilePhoto",
+        })
+        .populate({
+          path: "financeDepartment",
+          select:
+            "financeName financeEmail financePhoneNumber designation_status designation_password",
+          populate: {
+            path: "financeHead",
+            select: "staffFirstName staffMiddleName staffLastName",
+          },
+        })
+        .populate({
+          path: "financeDepartment",
+          select:
+            "financeName financeEmail financePhoneNumber designation_status designation_password",
+          populate: {
+            path: "institute",
+            select: "financeStatus",
+          },
+        })
+        .populate({
+          path: "admissionDepartment",
+          select:
+            "admissionAdminEmail admissionAdminPhoneNumber admissionAdminAbout designation_status designation_password",
+          populate: {
+            path: "admissionAdminHead",
+            select:
+              "staffFirstName staffMiddleName staffLastName photoId staffProfilePhoto",
+          },
+        })
+        .populate({
+          path: "sportDepartment",
+          select: "sportEmail sportPhoneNumber sportAbout sportName",
+          populate: {
+            path: "sportHead",
+            select:
+              "staffFirstName staffMiddleName staffLastName photoId staffProfilePhoto",
+          },
+        })
+        .populate({
+          path: "staffSportClass",
+          select:
+            "sportClassEmail sportClassPhoneNumber sportClassAbout sportClassName",
+          populate: {
+            path: "sportClassHead",
+            select:
+              "staffFirstName staffMiddleName staffLastName photoId staffProfilePhoto",
+          },
+        })
+        .populate({
+          path: "transportDepartment",
+          select: "vehicle_count",
+          populate: {
+            path: "transport_manager",
+            select:
+              "staffFirstName staffMiddleName staffLastName photoId staffProfilePhoto",
+          },
+        })
+        .populate({
+          path: "vehicle",
+          select: "_id vehicle_number",
+        })
+        .populate({
+          path: "library",
+          select: "coverId cover institute",
+          populate: {
+            path: "libraryHead",
+            select:
+              "staffFirstName staffMiddleName staffLastName photoId staffProfilePhoto",
+          },
+        })
+        .populate({
+          path: "aluminiDepartment",
+          select: "_id",
+        })
+        .populate({
+          path: "admissionModeratorDepartment",
+          select: "admission access_role active_tab",
+        })
+        .populate({
+          path: "financeModeratorDepartment",
+          select: "finance access_role",
+        })
+        .populate({
+          path: "instituteModeratorDepartment",
+          select: "institute access_role academic_department",
+          populate: {
+            path: "academic_department",
+            select: "departmentSelectBatch dName dTitle",
+          },
+        })
+        .populate({
+          path: "hostelModeratorDepartment",
+          select: "hostel access_role active_tab",
+        })
+        .populate({
+          path: "staffBatch",
+          select: "batchName batchStatus",
+        })
+        .lean()
+        .exec();
+    const staff_obj = {
+      message: "All Staff Designation Feed from DB 🙌",
+      staff: staff,
+    }
+    const staffEncrypt = await encryptionPayload(staff_obj);
+    res.status(200).send({ encrypt: staffEncrypt});
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+exports.retrievePreciseStudentDesignationArray = async (req, res) => {
+  try {
+    const { sid } = req.params;
+      var student = await Student.findById({ _id: sid })
+        .select(
+          "studentGRNO studentROLLNO"
+        )
+        .populate({
+          path: "studentClass",
+          select: "className classTitle classStatus classHeadTitle",
+          populate: {
+            path: "batch",
+            select: "batchName batchStatus",
+          },
+        })
+        .populate({
+          path: "institute",
+          select:
+            "insName name photoId insProfilePhoto library studentFormSetting student_section_form_show_query transportDepart",
+        })
+        .populate({
+          path: "user",
+          select:
+            "userLegalName username photoId profilePhoto userPhoneNumber userEmail",
+        })
+        .populate({
+          path: "vehicle",
+          select: "_id vehicle_number",
+        })
+        .populate({
+          path: "mentor",
+          select: "mentor_head",
+          populate: {
+            path: "mentor_head",
+            select:
+              "staffFirstName staffMiddleName staffLastName photoId staffProfilePhoto staffROLLNO",
+          },
+        })
+        .populate({
+          path: "student_unit",
+          select: "hostel_unit_name hostel",
+          populate: {
+            path: "hostel",
+            select: "_id",
+          },
+        })
+        .populate({
+          path: "student_bed_number",
+          select: "bed_number bed_status hostelRoom",
+          populate: {
+            path: "hostelRoom",
+            select: "room_name room_strength",
+          },
+        })
+        .populate({
+          path: "department",
+          select: "dName dTitle",
+        })
+        .populate({
+          path: "exist_linked_hostel.exist_student",
+          select:
+            "studentFirstName studentMiddleName studentLastName valid_full_name photoId studentProfilePhoto student_bed_number hostelRemainFeeCount",
+          populate: {
+            path: "student_bed_number",
+            select: "bed_number bed_status hostelRoom",
+            populate: {
+              path: "hostelRoom",
+              select: "room_name hostelUnit",
+              populate: {
+                path: "hostelUnit",
+                select: "hostel_unit_name",
+              },
+            },
+          },
+        });
+      res.status(200).send({
+        message: "All Student Designation Feed from DB 🙌",
+        student: student,
+      });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 // exports.getAllThreeCount = async (req, res) => {
 //   try {
 //     const id = req.params.id;

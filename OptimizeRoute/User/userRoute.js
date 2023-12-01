@@ -317,4 +317,21 @@ router.get(
 
 router.patch("/update/mode/:id", catchAsync(User.renderMode));
 
+router.get(
+  "/:uid/all/stats/query",
+  catchAsync(User.retrieveUserStatsQuery)
+);
+
+router.get(
+  "/precise/staffdesignationdata/:sid",
+  // isLoggedIn,
+  catchAsync(User.retrievePreciseStaffDesignationArray)
+);
+
+router.get(
+  "/precise/studentdesignationdata/:sid",
+  // isLoggedIn,
+  catchAsync(User.retrievePreciseStudentDesignationArray)
+);
+
 module.exports = router;
