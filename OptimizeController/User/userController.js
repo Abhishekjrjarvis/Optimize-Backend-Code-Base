@@ -35,6 +35,7 @@ const { valid_student_form_query } = require("../../Functions/validForm");
 const { handle_undefined } = require("../../Handler/customError");
 const encryptionPayload = require("../../Utilities/Encrypt/payload");
 const QvipleId = require("../../models/Universal/QvipleId");
+const NewApplication = require("../../models/Admission/NewApplication");
 
 exports.retrieveProfileData = async (req, res) => {
   try {
