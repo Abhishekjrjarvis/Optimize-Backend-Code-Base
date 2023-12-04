@@ -4252,7 +4252,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
     if(module_type === "OVERALL_VIEW"){
       finance.fees_statistics_filter.loading = true
       await finance.save()
-      res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list})
+      res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list, loading: finance?.fees_statistics_filter.loading})
       incomes += finance?.financeIncomeCashBalance + finance?.financeIncomeBankBalance
       expenses += finance?.financeExpenseCashBalance + finance?.financeExpenseBankBalance
       total_deposits += finance?.deposit_linked_head?.master?.deposit_amount + finance?.deposit_hostel_linked_head?.master?.deposit_amount
