@@ -1349,6 +1349,8 @@ exports.retrieveApproveStudentList = async (req, res) => {
         var studentIns = await Student.find({
           _id: { $in: student_ins?.ApproveStudent },
         })
+          .limit(limit)
+          .skip(skip)
           .sort({ createdAt: -1 })
           .select(
             "studentFirstName studentMiddleName studentLastName valid_full_name applicable_fees_pending studentGender studentCastCategory batches photoId studentProfilePhoto studentPhoneNumber studentGRNO studentROLLNO studentAdmissionDate admissionRemainFeeCount"
