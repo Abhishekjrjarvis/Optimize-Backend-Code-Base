@@ -273,7 +273,7 @@ exports.renderAllBatchStudentQuery = async (req, res) => {
         ],
       })
         .select(
-          "studentFirstName studentMiddleName studentLastName photoId studentProfilePhoto valid_full_name studentGRNO studentROLLNO"
+          "studentFirstName studentMiddleName studentLastName photoId studentProfilePhoto valid_full_name studentGRNO studentROLLNO student_prn_enroll_number"
         )
         .populate({
           path: "class_selected_batch",
@@ -286,7 +286,7 @@ exports.renderAllBatchStudentQuery = async (req, res) => {
         .limit(limit)
         .skip(skip)
         .select(
-          "studentFirstName studentMiddleName studentLastName photoId studentProfilePhoto valid_full_name studentGRNO studentROLLNO"
+          "studentFirstName studentMiddleName studentLastName photoId studentProfilePhoto valid_full_name studentGRNO studentROLLNO student_prn_enroll_number"
         )
         .populate({
           path: "class_selected_batch",
