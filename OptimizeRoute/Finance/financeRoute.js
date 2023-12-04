@@ -543,5 +543,9 @@ router
   .route("/:fid/all/upload/excel/query")
   .patch(catchAsync(Finance.renderFinanceUploadAllExcelQuery))
 
+router
+  .route("/valid/scholar/query")
+  .patch(catchAsync(Finance.renderValidScholarQuery))
+
 
 module.exports = router;

@@ -4827,6 +4827,14 @@ exports.renderFinanceScholarTransactionHistoryQuery = async (req, res) => {
       from,
       to
     } = req.query;
+
+    var total_fees = 0
+    var total_collect = 0
+    var total_pending = 0
+    var collect_by_student = 0
+    var pending_by_student = 0
+    var collect_by_government = 0
+    var pending_from_government = 0
     if (!id)
       return res.status(200).send({
         message: "Their is a bug need to fixed immediatley",
@@ -4897,7 +4905,7 @@ exports.renderFinanceScholarTransactionHistoryQuery = async (req, res) => {
         })
         .populate({
           path: "student",
-          select: "studentFirstName studentMiddleName studentLastName valid_full_name studentGender"
+          // select: "studentFirstName studentMiddleName studentLastName valid_full_name studentGender"
         })
         res.status(200).send({
           message: `Explore TimeLine ${timeline_content} Query`,
@@ -4942,7 +4950,7 @@ exports.renderFinanceScholarTransactionHistoryQuery = async (req, res) => {
         })
         .populate({
           path: "student",
-          select: "studentFirstName studentMiddleName studentLastName valid_full_name studentGender"
+          // select: "studentFirstName studentMiddleName studentLastName valid_full_name studentGender"
         })
         res.status(200).send({
           message: "Explore Date From To Query",
@@ -4972,6 +4980,19 @@ exports.renderFinanceScholarTransactionHistoryQuery = async (req, res) => {
           }).select("userLegalName");
           var qvipleId = await QvipleId.findOne({ user: user?._id })
         }
+        const all_remain = await RemainingList.find({ student: `${ref?.student?._id}`})
+        .populate({
+          path: "fee_structure"
+        })
+        for(var ele of all_remain){
+          total_fees += ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount
+          total_collect += ele?.paid_fee + ref?.studentPaidFeeCount
+          total_pending += ele?.remaining_fee + ref?.studentRemainingFeeCount
+          collect_by_student += ele?.paid_by_student
+          pending_by_student += ele?.admissionRemainFeeCount ?? 0
+          collect_by_government += ele?.paid_by_government
+          pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+        }
         trans_list.push({
           QvipleId: qvipleId?.qviple_id,
           ReceiptNumber: ref?.payment_invoice_number ?? "#NA",
@@ -4985,6 +5006,13 @@ exports.renderFinanceScholarTransactionHistoryQuery = async (req, res) => {
           PaymentMode: ref?.fee_receipt?.fee_payment_mode,
           PaymentStatus: ref?.payment_status ?? "#NA",
           PaymentDate: moment(ref?.created_at).format("LL") ?? "#NA",
+          TotalFees: total_fees,
+          TotalCollect: total_collect,
+          TotalOutstanding: total_pending,
+          CollectionFromStudent: collect_by_student,
+          OutStandingFromStudent: pending_by_student,
+          CollectionFromGovernment: collect_by_government,
+          OutStandingFromGovernment: pending_from_government
         });
       }
       await scholar_transaction_json_to_excel_query(trans_list, "Scholarship", timeline, id);
