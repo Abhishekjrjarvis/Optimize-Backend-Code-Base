@@ -1763,7 +1763,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         )
         .populate({
           path: "staffDepartment",
-          select: "dName dTitle",
+          select: "dName dTitle member_module_unique",
           populate: {
             path: "departmentSelectBatch",
             select: "batchName batchStatus",
@@ -1771,7 +1771,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         })
         .populate({
           path: "staffClass",
-          select: "className classTitle classStatus classHeadTitle",
+          select: "className classTitle classStatus classHeadTitle member_module_unique",
           populate: {
             path: "batch",
             select: "batchName batchStatus",
@@ -1780,7 +1780,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         .populate({
           path: "staffSubject",
           select:
-            "subjectName subjectTitle subjectStatus selected_batch_query subject_category subjectOptional",
+            "subjectName subjectTitle subjectStatus selected_batch_query subject_category subjectOptional member_module_unique",
           populate: {
             path: "class",
             select: "className classTitle classStatus classHeadTitle",
@@ -1793,7 +1793,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         .populate({
           path: "staffSubject",
           select:
-            "subjectName subjectTitle subjectStatus selected_batch_query subject_category subjectOptional",
+            "subjectName subjectTitle subjectStatus selected_batch_query subject_category subjectOptional member_module_unique",
           populate: {
             path: "selected_batch_query",
             select: "batchName batchStatus",
@@ -1812,7 +1812,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         .populate({
           path: "financeDepartment",
           select:
-            "financeName financeEmail financePhoneNumber designation_status designation_password",
+            "financeName financeEmail financePhoneNumber designation_status designation_password member_module_unique",
           populate: {
             path: "financeHead",
             select: "staffFirstName staffMiddleName staffLastName",
@@ -1821,7 +1821,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         .populate({
           path: "financeDepartment",
           select:
-            "financeName financeEmail financePhoneNumber designation_status designation_password",
+            "financeName financeEmail financePhoneNumber designation_status designation_password member_module_unique",
           populate: {
             path: "institute",
             select: "financeStatus",
@@ -1830,7 +1830,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         .populate({
           path: "admissionDepartment",
           select:
-            "admissionAdminEmail admissionAdminPhoneNumber admissionAdminAbout designation_status designation_password",
+            "admissionAdminEmail admissionAdminPhoneNumber admissionAdminAbout designation_status designation_password member_module_unique",
           populate: {
             path: "admissionAdminHead",
             select:
@@ -1858,7 +1858,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         })
         .populate({
           path: "transportDepartment",
-          select: "vehicle_count",
+          select: "vehicle_count member_module_unique",
           populate: {
             path: "transport_manager",
             select:
@@ -1871,7 +1871,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
         })
         .populate({
           path: "library",
-          select: "coverId cover institute",
+          select: "coverId cover institute member_module_unique",
           populate: {
             path: "libraryHead",
             select:
@@ -1879,7 +1879,7 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
           },
         })
         .populate({
-          path: "aluminiDepartment",
+          path: "aluminiDepartment member_module_unique",
           select: "_id",
         })
         .populate({

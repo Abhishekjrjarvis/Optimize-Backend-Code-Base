@@ -627,6 +627,17 @@ const financeSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    mismatch_excel: [
+      {
+        excel_file: { type: String },
+        excel_file_name: { type: String },
+        created_at: { type: Date, default: Date.now },
+      },
+    ],
+    mismatch_excel_count: {
+      type: Number,
+      default: 0
+    }
   },
   { timestamps: true }
 );

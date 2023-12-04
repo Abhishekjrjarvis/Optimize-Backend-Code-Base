@@ -538,6 +538,10 @@ router
 router
   .route("/:fid/all/department/query")
   .get(catchAsync(Finance.renderFinanceDepartmentQuery));
-  
+
+router
+  .route("/:fid/all/upload/excel/query")
+  .patch(catchAsync(Finance.renderFinanceUploadAllExcelQuery))
+
 
 module.exports = router;

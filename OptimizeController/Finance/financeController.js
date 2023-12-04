@@ -5657,6 +5657,30 @@ exports.renderFinanceDepartmentQuery = async(req, res) => {
   }
 }
 
+exports.renderFinanceUploadAllExcelQuery = async(req, res) => {
+  try{
+    const { fid } = req?.params
+    if(!fid) return res.status(200).send({ message: "Thier is a bug need to fixed immediately", access: false})
+
+    const one_finance = await Finance.findById({ _id: fid })
+    .select("mismatch_excel mismatch_excel_count")
+
+    var all_nested_excel = await nested_document_limit(one_finance?.mismatch_excel, page, limit)
+
+    if(all_nested_excel?.length > 0){
+      res.status(200).send({ message: "Explore All Mismatch Excel Entries Query", access: true, all_nested_excel: all_nested_excel})
+    }
+    else{
+      res.status(200).send({ message: "No Mismatch Excel Entries Found Query", access: false, all_nested_excel: []})
+    }
+
+    res.status(200).send({ message: "Explore All Upload Excel Query", access: true})
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
 
 // exports.updateAlias = async(req, res) => {
 //   try{
