@@ -3784,6 +3784,8 @@ exports.renderStudentStatisticsQuery = async(req, res) => {
       var ph_f = 0
       var general_m_arr = []
       var general_f_arr = []
+      var boy_arr = []
+      var girl_arr = []
       var obc_m_arr = []
       var obc_f_arr = []
       var sc_m_arr = []
@@ -4033,12 +4035,20 @@ exports.renderStudentStatisticsQuery = async(req, res) => {
         else{
           ph_f += 0
         }
+        if(ele?.studentGender?.toLowerCase() === "male"){
+          boy_arr.push(ele)
+        }
+        if(ele?.studentGender?.toLowerCase() === "female"){
+          girl_arr.push(ele)
+        }
       }
       excel_list.push({
         className: `${val?.className}-${val?.classTitle}`,
         strength: val?.ApproveStudent?.length,
         boy: val?.boyCount,
+        boy_arr: boy_arr,
         girl: val?.girlCount,
+        girl_arr: girl_arr,
         general_m: general_m,
         general_f: general_f,
         obc_m: obc_m,
