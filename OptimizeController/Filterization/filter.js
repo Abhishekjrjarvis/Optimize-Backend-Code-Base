@@ -24,6 +24,7 @@ const {
   fee_heads_receipt_json_to_excel_repay_query,
   json_to_excel_normal_student_promote_query,
   json_to_excel_statistics_promote_query,
+  scholar_transaction_json_to_excel_query,
 } = require("../../Custom/JSONToExcel");
 // const encryptionPayload = require("../../Utilities/Encrypt/payload");
 const OrderPayment = require("../../models/RazorPay/orderPayment");
@@ -4986,7 +4987,7 @@ exports.renderFinanceScholarTransactionHistoryQuery = async (req, res) => {
           PaymentDate: moment(ref?.created_at).format("LL") ?? "#NA",
         });
       }
-      await transaction_json_to_excel_query(trans_list, "Scholarship", timeline, id);
+      await scholar_transaction_json_to_excel_query(trans_list, "Scholarship", timeline, id);
     }
   } catch (e) {
     console.log(e);

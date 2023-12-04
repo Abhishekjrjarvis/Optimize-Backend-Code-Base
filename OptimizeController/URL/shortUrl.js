@@ -136,8 +136,13 @@ exports.loginUsernameQuery = async(req, res) => {
             login: true,
             is_developer: user?.is_developer,
           }
-          const loginEncrypt = await encryptionPayload(admin_encrypt);
-          res.status(200).send({ encrypt: loginEncrypt });
+        //   const loginEncrypt = await encryptionPayload(admin_encrypt);
+          res.status(200).send({ 
+            token: `Bearer ${token}`,
+            user: custom_user,
+            login: true,
+            is_developer: user?.is_developer,
+          });
           user.last_login = new Date();
           await user.save();
         }

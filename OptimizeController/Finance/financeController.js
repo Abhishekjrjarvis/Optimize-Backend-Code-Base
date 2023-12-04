@@ -4276,6 +4276,7 @@ exports.renderFinanceDeleteFeeMasterQuery = async (req, res) => {
 exports.renderAllExportExcelArrayQuery = async (req, res) => {
   try {
     const { id } = req.params;
+    const { filter } = req?.query
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
     if (!id)
@@ -4287,11 +4288,23 @@ exports.renderAllExportExcelArrayQuery = async (req, res) => {
       "export_collection"
     );
 
+    if(filter === "Scholarship"){
+    var arr = ins_admin?.export_collection?.filter((val) => {
+      if(val?.excel_val === "Scholarship") return val
+    })
     var all_excel = await nested_document_limit(
       page,
       limit,
       ins_admin?.export_collection.reverse()
     );
+  }
+  else{
+    var all_excel = await nested_document_limit(
+      page,
+      limit,
+      ins_admin?.export_collection.reverse()
+    );
+  }
     if (all_excel?.length > 0) {
       // const obj_excel = {
         
@@ -4301,7 +4314,7 @@ exports.renderAllExportExcelArrayQuery = async (req, res) => {
         message: "Explore All Exported Excel",
         access: true,
         all_excel: all_excel,
-        count: ins_admin?.export_collection?.length
+        count: all_excel?.length
       });
     } else {
       res.status(200).send({
