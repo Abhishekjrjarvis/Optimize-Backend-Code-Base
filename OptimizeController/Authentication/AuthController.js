@@ -444,6 +444,7 @@ exports.getOtpAtUser = async (req, res) => {
         const user_obj = {
           message: "code will be send to registered mobile number",
           userPhoneNumber: valid_user,
+          ePhone: valid_user
         }
         const uPhoneEncrypt = await encryptionPayload(user_obj);
         res.status(200).send({ encrypt: uPhoneEncrypt });
@@ -463,6 +464,7 @@ exports.getOtpAtUser = async (req, res) => {
         const user_obj = {
           message: "code will be send to entered Email",
           userPhoneNumber: userPhoneNumber,
+          ePhone: userPhoneNumber
         }
         const uPhoneEncrypt = await encryptionPayload(user_obj);
         res.status(200).send({ encrypt: uPhoneEncrypt });
