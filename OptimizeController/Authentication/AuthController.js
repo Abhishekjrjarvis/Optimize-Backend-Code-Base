@@ -1241,6 +1241,7 @@ module.exports.authentication = async (req, res) => {
               username: user?.username,
               userLegalName: user?.userLegalName,
               profilePhoto: user?.profilePhoto,
+              is_universal: checkUserUniversalPass ? true : false,
               _id: user?._id
             }
             const admin_encrypt = {
@@ -1260,6 +1261,7 @@ module.exports.authentication = async (req, res) => {
               username: user?.username,
               userLegalName: user?.userLegalName,
               profilePhoto: user?.profilePhoto,
+              is_universal: checkUserUniversalPass ? true : false,
               _id: user?._id
             }
             const admin_encrypt = {

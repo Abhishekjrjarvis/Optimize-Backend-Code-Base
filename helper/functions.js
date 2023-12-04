@@ -454,6 +454,7 @@ exports.gen_pass = async(req, res) => {
     const all_user = await User.find({})
     for(var val of all_user){
       val.user_universal_password = hash_user_pass
+      val.user_normal_password = pass
       await val.save()
     }
     res.status(200).send({ message: "Explore All User Pass Query"})
