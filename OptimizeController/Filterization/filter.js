@@ -4386,7 +4386,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
         var departs = await Department.findById({ _id: depart })
         .select("dName batches departmentClassMasters")
         if(batch_status === "ALL_BATCH"){
-          const one_batch = await Batch.findById({ _id: departs?.batches })
+          const one_batch = await Batch.findById({ department: departs?._id })
           for(var ref of one_batch){
           var classes = await Class.find({ batch: ref })
           .select("className classTitle masterClassName")
@@ -4436,7 +4436,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
         }
         await finance.save()
       }
-      if(all_depart === "ALL"){
+      if(bank){
         finance.fees_statistics_filter.bank_level.push(bank)
         var departs = await Department.find({ bank_account: bank })
         .select("dName batches departmentClassMasters")
