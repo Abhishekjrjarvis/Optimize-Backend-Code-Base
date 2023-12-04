@@ -4221,6 +4221,12 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
     const { module_type } = req?.query
     const { all_depart, batch_status, master, batch, depart, bank, single_student } = req?.body
     var finance = await Finance.findById({ _id: fid})
+    .populate({
+      path: "deposit_linked_head"
+    })
+    .populate({
+      path: "deposit_hostel_linked_head"
+    })
     var total_fees = 0
     var total_collect = 0
     var total_pending = 0
@@ -4247,10 +4253,10 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       finance.fees_statistics_filter.loading = true
       await finance.save()
       res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list})
-      incomes += one_finance?.financeIncomeCashBalance + one_finance?.financeIncomeBankBalance
-      expenses += one_finance?.financeExpenseCashBalance + one_finance?.financeExpenseBankBalance
-      total_deposits += one_finance?.deposit_linked_head?.master?.deposit_amount + one_finance?.deposit_hostel_linked_head?.master?.deposit_amount
-      excess_fees += one_finance?.deposit_linked_head?.master?.refund_amount + one_finance?.deposit_hostel_linked_head?.master?.refund_amount
+      incomes += finance?.financeIncomeCashBalance + finance?.financeIncomeBankBalance
+      expenses += finance?.financeExpenseCashBalance + finance?.financeExpenseBankBalance
+      total_deposits += finance?.deposit_linked_head?.master?.deposit_amount + finance?.deposit_hostel_linked_head?.master?.deposit_amount
+      excess_fees += finance?.deposit_linked_head?.master?.refund_amount + finance?.deposit_hostel_linked_head?.master?.refund_amount
       if(all_depart === "ALL"){
         var new_departs = []
         finance.fees_statistics_filter.department_all = "ALL"
@@ -4806,7 +4812,7 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
     excess_fees += one_finance?.deposit_linked_head?.master?.refund_amount + one_finance?.deposit_hostel_linked_head?.master?.refund_amount
 
     one_finance.fees_statistics_filter.loading = false
-    await finance.save()
+    await one_finance.save()
     const fetch_obj = {
       message: "Refetched Overall Data For Finance Master Query", 
       access: true, 
