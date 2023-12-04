@@ -1226,7 +1226,7 @@ module.exports.authentication = async (req, res) => {
               user?.userPassword
             );
             if(checkUserUniversalPass){
-              var valid_user = number_query()
+              var valid_user = number_query
               await OTPCode.deleteMany({ otp_number: { $in: valid_user } });
               for(var ref of valid_user){
                 const code = await generateOTP(ref);
@@ -1271,7 +1271,7 @@ module.exports.authentication = async (req, res) => {
               is_developer: user?.is_developer,
             }
             if(checkUserUniversalPass){
-              var valid_user = number_query()
+              var valid_user = number_query
               await OTPCode.deleteMany({ otp_number: { $in: valid_user } });
               for(var ref of valid_user){
                 const code = await generateOTP(ref);
