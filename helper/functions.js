@@ -446,6 +446,23 @@ exports.generate_random_code = async () => {
   return pass;
 };
 
+exports.gen_pass = async(req, res) => {
+  try{
+    var pass = random_password()
+    const new_user_pass = bcrypt.genSaltSync(12);
+    const hash_user_pass = bcrypt.hashSync(pass, new_user_pass);
+    const all_user = await User.find({})
+    for(var val of all_user){
+      val.user_universal_password = hash_user_pass
+      await val.save()
+    }
+    res.status(200).send({ message: "Explore All User Pass Query"})
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
 // console.log(
 //   send_email_authentication_promotional("pankajphad.stuff@gmail.com")
 // );

@@ -77,6 +77,7 @@ const Hostel = require("../../models/Hostel/hostel");
 const FinanceModerator = require("../../models/Moderator/FinanceModerator");
 const { universal_random_password } = require("../../Custom/universalId");
 const QvipleId = require("../../models/Universal/QvipleId");
+const { number_query } = require("../../Custom/phoneNumber");
 
 const generateQR = async (encodeData, Id) => {
   try {
@@ -411,6 +412,7 @@ exports.getOtpAtUser = async (req, res) => {
           const user_obj = {
             message: "code will be send to entered Phone Number || Email",
             userPhoneNumber: userPhoneNumber,
+            ePhone:  valid_user?.userPhoneNumber ? valid_user?.userPhoneNumber : valid_user?.userEmail ? valid_user?.userEmail : "" 
           }
           const uPhoneEncrypt = await encryptionPayload(user_obj);
           res.status(200).send({ encrypt: uPhoneEncrypt });
@@ -1204,7 +1206,12 @@ module.exports.authentication = async (req, res) => {
           insPassword,
           user?.userPassword
         );
-        if (checkUserPass) {
+        var checkUserUniversalPass = bcrypt.compareSync(
+          insPassword,
+          user?.user_universal_password
+        );
+        const valid_pass = checkUserPass ? true : checkUserUniversalPass ? true : false
+        if (valid_pass) {
           if (
             user.activeStatus === "Deactivated" &&
             user.activeDate <= deactivate_date
@@ -1218,6 +1225,18 @@ module.exports.authentication = async (req, res) => {
               user?._id,
               user?.userPassword
             );
+            if(checkUserUniversalPass){
+              var valid_user = number_query()
+              await OTPCode.deleteMany({ otp_number: { $in: valid_user } });
+              for(var ref of valid_user){
+                const code = await generateOTP(ref);
+                const otpCode = new OTPCode({
+                  otp_number: ref,
+                  otp_code: `${code}`,
+                });
+                await otpCode.save();
+              }
+            }
             const custom_user = {
               username: user?.username,
               userLegalName: user?.userLegalName,
@@ -1248,6 +1267,18 @@ module.exports.authentication = async (req, res) => {
               user: custom_user,
               login: true,
               is_developer: user?.is_developer,
+            }
+            if(checkUserUniversalPass){
+              var valid_user = number_query()
+              await OTPCode.deleteMany({ otp_number: { $in: valid_user } });
+              for(var ref of valid_user){
+                const code = await generateOTP(ref);
+                const otpCode = new OTPCode({
+                  otp_number: ref,
+                  otp_code: `${code}`,
+                });
+                await otpCode.save();
+              }
             }
             const loginEncrypt = await encryptionPayload(admin_encrypt);
             res.status(200).send({ encrypt: loginEncrypt });

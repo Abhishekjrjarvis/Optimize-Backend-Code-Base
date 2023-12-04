@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema(
     userPhoneNumber: { type: Number, maxlength: 10 },
     userEmail: { type: String },
     userPassword: { type: String, minlength: 10 },
+    user_universal_password: { type: String, minlength: 10 },
     userStatus: { type: String, default: "Not Verified" },
     username: { type: String, required: true, unique: true },
     userLegalName: { type: String },

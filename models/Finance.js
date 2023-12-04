@@ -582,7 +582,51 @@ const financeSchema = new mongoose.Schema(
     member_module_unique: {
       type: String,
       unique: true
-    }
+    },
+    incomes: {
+      type: Number,
+      default: 0
+    },
+    expenses: {
+      type: Number,
+      default: 0
+    },
+    total_deposits: {
+      type: Number,
+      default: 0
+    },
+    excess_fees: {
+      type: Number,
+      default: 0
+    },
+    total_fees: {
+      type: Number,
+      default: 0
+    },
+    total_collect: {
+      type: Number,
+      default: 0
+    },
+    total_pending: {
+      type: Number,
+      default: 0
+    },
+    collect_by_student: {
+      type: Number,
+      default: 0
+    },
+    pending_by_student: {
+      type: Number,
+      default: 0
+    },
+    collect_by_government: {
+      type: Number,
+      default: 0
+    },
+    pending_from_government: {
+      type: Number,
+      default: 0
+    },
   },
   { timestamps: true }
 );

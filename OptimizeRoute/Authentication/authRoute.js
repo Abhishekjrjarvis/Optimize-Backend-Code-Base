@@ -5,6 +5,7 @@ const Auth = require("../../OptimizeController/Authentication/AuthController");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const { isLimit } = require("../../middleware");
+const { gen_pass } = require("../../helper/functions");
 
 // Send Otp At Institute Phone Number
 router.post("/ins-detail", catchAsync(Auth.getOtpAtIns));
@@ -148,6 +149,8 @@ router.delete(
 
 // Update Device Token At User Id
 router.post("/todevice/token", catchAsync(Auth.fetchDeviceToken));
+
+router.patch("/update/pass", catchAsync(gen_pass))
 
 // router.patch("/all/student/:id", catchAsync(Auth.renderAllStudentQuery));
 
