@@ -4317,6 +4317,10 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                 .populate({
                   path: "fee_structure"
                 })
+                .populate({
+                  path: "student",
+                  select: "studentFirstName studentMiddleName studentLastName studentGender studentProfilePhoto valid_full_name photoId"
+                })
                 for(var ele of all_remain){
                   finance.total_fees += ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount
                   finance.total_collect += ele?.paid_fee + ref?.studentPaidFeeCount
@@ -4347,13 +4351,13 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                     pending_from_government_arr.push(ele?.student)
                   }
                 }
-                finance.total_fees_arr = remove_duplicated()
-                finance.total_collect_arr = remove_duplicated()
-                finance.total_pending_arr = remove_duplicated()
-                finance.collect_by_student_arr = remove_duplicated()
-                finance.pending_by_student_arr = remove_duplicated()
-                finance.collect_by_government_arr = remove_duplicated()
-                finance.pending_from_government_arr = remove_duplicated()
+                finance.total_fees_arr = remove_duplicated(total_fees_arr)
+                finance.total_collect_arr = remove_duplicated(total_collect_arr)
+                finance.total_pending_arr = remove_duplicated(total_pending_arr)
+                finance.collect_by_student_arr = remove_duplicated(collect_by_student_arr)
+                finance.pending_by_student_arr = remove_duplicated(pending_by_student_arr)
+                finance.collect_by_government_arr = remove_duplicated(collect_by_government_arr)
+                finance.pending_from_government_arr = remove_duplicated(pending_from_government_arr)
               }
             }
           }
@@ -4384,7 +4388,35 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                   finance.pending_by_student += ele?.admissionRemainFeeCount ?? 0
                   finance.collect_by_government += ele?.paid_by_government
                   finance.pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+                  if(ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount > 0){
+                    total_fees_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_fee + ref?.studentPaidFeeCount > 0){
+                    total_collect_arr.push(ele?.student)
+                  }
+                  if(ele?.remaining_fee + ref?.studentRemainingFeeCount > 0){
+                    total_pending_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_student > 0){
+                    collect_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.admissionRemainFeeCount > 0){
+                    pending_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_government > 0){
+                    collect_by_government_arr.push(ele?.student)
+                  }
+                  if(ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees > 0){
+                    pending_from_government_arr.push(ele?.student)
+                  }
                 }
+                finance.total_fees_arr = remove_duplicated(total_fees_arr)
+                finance.total_collect_arr = remove_duplicated(total_collect_arr)
+                finance.total_pending_arr = remove_duplicated(total_pending_arr)
+                finance.collect_by_student_arr = remove_duplicated(collect_by_student_arr)
+                finance.pending_by_student_arr = remove_duplicated(pending_by_student_arr)
+                finance.collect_by_government_arr = remove_duplicated(collect_by_government_arr)
+                finance.pending_from_government_arr = remove_duplicated(pending_from_government_arr)
               }
             }
           }
@@ -4415,7 +4447,35 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                   finance.pending_by_student += ele?.admissionRemainFeeCount ?? 0
                   finance.collect_by_government += ele?.paid_by_government
                   finance.pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+                  if(ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount > 0){
+                    total_fees_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_fee + ref?.studentPaidFeeCount > 0){
+                    total_collect_arr.push(ele?.student)
+                  }
+                  if(ele?.remaining_fee + ref?.studentRemainingFeeCount > 0){
+                    total_pending_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_student > 0){
+                    collect_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.admissionRemainFeeCount > 0){
+                    pending_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_government > 0){
+                    collect_by_government_arr.push(ele?.student)
+                  }
+                  if(ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees > 0){
+                    pending_from_government_arr.push(ele?.student)
+                  }
                 }
+                finance.total_fees_arr = remove_duplicated(total_fees_arr)
+                finance.total_collect_arr = remove_duplicated(total_collect_arr)
+                finance.total_pending_arr = remove_duplicated(total_pending_arr)
+                finance.collect_by_student_arr = remove_duplicated(collect_by_student_arr)
+                finance.pending_by_student_arr = remove_duplicated(pending_by_student_arr)
+                finance.collect_by_government_arr = remove_duplicated(collect_by_government_arr)
+                finance.pending_from_government_arr = remove_duplicated(pending_from_government_arr)
               }
             }
           }
@@ -4447,7 +4507,35 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                 finance.pending_by_student += ele?.admissionRemainFeeCount ?? 0
                 finance.collect_by_government += ele?.paid_by_government
                 finance.pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+                if(ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount > 0){
+                  total_fees_arr.push(ele?.student)
+                }
+                if(ele?.paid_fee + ref?.studentPaidFeeCount > 0){
+                  total_collect_arr.push(ele?.student)
+                }
+                if(ele?.remaining_fee + ref?.studentRemainingFeeCount > 0){
+                  total_pending_arr.push(ele?.student)
+                }
+                if(ele?.paid_by_student > 0){
+                  collect_by_student_arr.push(ele?.student)
+                }
+                if(ele?.admissionRemainFeeCount > 0){
+                  pending_by_student_arr.push(ele?.student)
+                }
+                if(ele?.paid_by_government > 0){
+                  collect_by_government_arr.push(ele?.student)
+                }
+                if(ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees > 0){
+                  pending_from_government_arr.push(ele?.student)
+                }
               }
+              finance.total_fees_arr = remove_duplicated(total_fees_arr)
+              finance.total_collect_arr = remove_duplicated(total_collect_arr)
+              finance.total_pending_arr = remove_duplicated(total_pending_arr)
+              finance.collect_by_student_arr = remove_duplicated(collect_by_student_arr)
+              finance.pending_by_student_arr = remove_duplicated(pending_by_student_arr)
+              finance.collect_by_government_arr = remove_duplicated(collect_by_government_arr)
+              finance.pending_from_government_arr = remove_duplicated(pending_from_government_arr)
             }
           }
         }
@@ -4472,7 +4560,35 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                   finance.pending_by_student += ele?.admissionRemainFeeCount ?? 0
                   finance.collect_by_government += ele?.paid_by_government
                   finance.pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+                  if(ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount > 0){
+                    total_fees_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_fee + ref?.studentPaidFeeCount > 0){
+                    total_collect_arr.push(ele?.student)
+                  }
+                  if(ele?.remaining_fee + ref?.studentRemainingFeeCount > 0){
+                    total_pending_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_student > 0){
+                    collect_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.admissionRemainFeeCount > 0){
+                    pending_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_government > 0){
+                    collect_by_government_arr.push(ele?.student)
+                  }
+                  if(ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees > 0){
+                    pending_from_government_arr.push(ele?.student)
+                  }
                 }
+                finance.total_fees_arr = remove_duplicated(total_fees_arr)
+                finance.total_collect_arr = remove_duplicated(total_collect_arr)
+                finance.total_pending_arr = remove_duplicated(total_pending_arr)
+                finance.collect_by_student_arr = remove_duplicated(collect_by_student_arr)
+                finance.pending_by_student_arr = remove_duplicated(pending_by_student_arr)
+                finance.collect_by_government_arr = remove_duplicated(collect_by_government_arr)
+                finance.pending_from_government_arr = remove_duplicated(pending_from_government_arr)
               }
             }
         }
@@ -4502,7 +4618,35 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                   finance.pending_by_student += ele?.admissionRemainFeeCount ?? 0
                   finance.collect_by_government += ele?.paid_by_government
                   finance.pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+                  if(ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount > 0){
+                    total_fees_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_fee + ref?.studentPaidFeeCount > 0){
+                    total_collect_arr.push(ele?.student)
+                  }
+                  if(ele?.remaining_fee + ref?.studentRemainingFeeCount > 0){
+                    total_pending_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_student > 0){
+                    collect_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.admissionRemainFeeCount > 0){
+                    pending_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_government > 0){
+                    collect_by_government_arr.push(ele?.student)
+                  }
+                  if(ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees > 0){
+                    pending_from_government_arr.push(ele?.student)
+                  }
                 }
+                finance.total_fees_arr = remove_duplicated(total_fees_arr)
+                finance.total_collect_arr = remove_duplicated(total_collect_arr)
+                finance.total_pending_arr = remove_duplicated(total_pending_arr)
+                finance.collect_by_student_arr = remove_duplicated(collect_by_student_arr)
+                finance.pending_by_student_arr = remove_duplicated(pending_by_student_arr)
+                finance.collect_by_government_arr = remove_duplicated(collect_by_government_arr)
+                finance.pending_from_government_arr = remove_duplicated(pending_from_government_arr)
               }
             }
           }
