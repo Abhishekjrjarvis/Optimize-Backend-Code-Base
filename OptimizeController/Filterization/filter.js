@@ -4261,6 +4261,9 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
     var excess_fees_arr = []
 
     if(module_type === "OVERALL_VIEW"){
+      finance.fees_statistics_filter.loading = true
+      await finance.save()
+      res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list, loading: finance?.fees_statistics_filter.loading})
       finance.total_fees = 0
       finance.total_collect = 0
       finance.total_pending = 0
@@ -4272,9 +4275,14 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       finance.expenses = 0
       finance.total_deposits = 0
       finance.excess_fees = 0
-      finance.fees_statistics_filter.loading = true
+
+      finance.fees_statistics_filter.batch_level = []
+      finance.fees_statistics_filter.batch_all = ""
+      finance.fees_statistics_filter.department_level = []
+      finance.fees_statistics_filter.department_all = ""
+      finance.fees_statistics_filter.bank_level = []
+      finance.fees_statistics_filter.master_level = ""
       await finance.save()
-      res.status(200).send({ message: "Explore Admission View Query", access: true, excel_list: excel_list, loading: finance?.fees_statistics_filter.loading})
       incomes += finance?.financeIncomeCashBalance + finance?.financeIncomeBankBalance
       expenses += finance?.financeExpenseCashBalance + finance?.financeExpenseBankBalance
       total_deposits += finance?.deposit_linked_head?.master?.deposit_amount + finance?.deposit_hostel_linked_head?.master?.deposit_amount
