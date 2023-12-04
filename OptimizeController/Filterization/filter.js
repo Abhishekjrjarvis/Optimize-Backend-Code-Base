@@ -4824,7 +4824,7 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
       collect_by_government: collect_by_government,
       pending_from_government: pending_from_government,
       last_update: new Date(),
-      loading_status: one_finance?.finance.fees_statistics_filter?.loading,
+      loading_status: one_finance?.fees_statistics_filter?.loading,
       incomes: incomes,
       expenses: expenses,
       total_deposits: total_deposits ?? 0,
