@@ -577,7 +577,8 @@ const financeSchema = new mongoose.Schema(
         type: String
       },
       bank_level: [],
-      master_level: []
+      master_level: [],
+      loading: { type: Boolean, default: true}
     },
     member_module_unique: {
       type: String,
