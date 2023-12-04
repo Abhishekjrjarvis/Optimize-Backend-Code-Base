@@ -4386,7 +4386,7 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
         var departs = await Department.findById({ _id: depart })
         .select("dName batches departmentClassMasters")
         if(batch_status === "ALL_BATCH"){
-          const one_batch = await Batch.findById({ _id: { $in: departs?.batches } })
+          const one_batch = await Batch.findById({ _id: departs?.batches })
           for(var ref of one_batch){
           var classes = await Class.find({ batch: ref })
           .select("className classTitle masterClassName")
