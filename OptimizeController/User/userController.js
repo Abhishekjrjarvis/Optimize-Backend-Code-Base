@@ -1879,8 +1879,8 @@ exports.retrieveStaffDesignationArray = async (req, res) => {
           },
         })
         .populate({
-          path: "aluminiDepartment member_module_unique",
-          select: "_id",
+          path: "aluminiDepartment",
+          select: "_id member_module_unique",
         })
         .populate({
           path: "admissionModeratorDepartment",

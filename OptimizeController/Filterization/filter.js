@@ -44,7 +44,6 @@ const invokeSpecificRegister = require("../../Firebase/specific");
 const BankAccount = require("../../models/Finance/BankAccount");
 const Admin = require("../../models/superAdmin");
 const encryptionPayload = require("../../Utilities/Encrypt/payload");
-const QvipleId = require("../../models/Universal/QvipleId");
 
 var trendingQuery = (trends, cat, type, page) => {
   if (cat !== "" && page === 1) {
@@ -952,10 +951,13 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
   try {
     const { id } = req.params;
     const {
+      tab_flow,
       timeline,
       timeline_content,
       from,
-      to
+      to,
+      fee_type,
+      fee_mode,
     } = req.query;
     if (!id)
       return res.status(200).send({
@@ -1006,6 +1008,7 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
         l_month = `0${l_month}`;
       }
     }
+    if (tab_flow === "BY_DATE") {
       if (valid_timeline) {
         const g_date = new Date(`${g_year}-${g_month}-01T00:00:00.000Z`);
         const l_date = new Date(`${l_year}-${l_month}-01T00:00:00.000Z`);
@@ -1021,10 +1024,7 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
               payment_to_end_user_id: `${id}`,
             },
           ],
-        })
-        .populate({
-          path: "fee_receipt"
-        })
+        });
         res.status(200).send({
           message: `Explore TimeLine ${timeline_content} Query`,
           access: true,
@@ -1062,24 +1062,198 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
               payment_to_end_user_id: `${id}`,
             },
           ],
-        })
-        .populate({
-          path: "fee_receipt"
-        })
+        });
         res.status(200).send({
           message: "Explore Date From To Query",
           access: true,
           order,
         });
       }
+    } else if (tab_flow === "BY_FEE_TYPE") {
+      var g_year = new Date(`${from}`).getFullYear();
+      var l_year = new Date(`${to}`).getFullYear();
+      var g_day = new Date(`${from}`).getDate();
+      var l_day = new Date(`${to}`).getDate();
+      var g_month = new Date(`${from}`).getMonth() + 1;
+      if (g_month < 10) {
+        g_month = `0${g_month}`;
+      }
+      var l_month = new Date(`${to}`).getMonth() + 1;
+      if (l_month < 10) {
+        l_month = `0${l_month}`;
+      }
+      if (g_day < 10) {
+        g_day = `0${g_day}`;
+      }
+      if (l_day < 10) {
+        l_day = `0${l_day}`;
+      }
+      const g_date = new Date(`${g_year}-${g_month}-${g_day}T00:00:00.000Z`);
+      const l_date = new Date(`${l_year}-${l_month}-${l_day}T00:00:00.000Z`);
+      var order = await OrderPayment.find({
+        $and: [
+          {
+            created_at: {
+              $gte: g_date,
+              $lte: l_date,
+            },
+          },
+          {
+            payment_to_end_user_id: `${id}`,
+          },
+        ],
+        $or: [{ payment_module_type: { $regex: fee_type, $options: "i" } }],
+      });
+      if (fee_mode) {
+        order = order?.filter((ref) => {
+          if (ref?.payment_mode === fee_mode) return ref;
+        });
+      }
+      res.status(200).send({
+        message: "Explore Fee Type From To Query",
+        access: true,
+      });
+    } else if (tab_flow === "BY_EXPENSES") {
+      if (valid_timeline) {
+        const g_date = new Date(`${g_year}-${g_month}-01T00:00:00.000Z`);
+        const l_date = new Date(`${l_year}-${l_month}-01T00:00:00.000Z`);
+        var order = await OrderPayment.find({
+          $and: [
+            {
+              created_at: {
+                $gte: g_date,
+                $lte: l_date,
+              },
+            },
+            {
+              payment_to_end_user_id: `${id}`,
+            },
+            {
+              payment_module_type: "Expense",
+            },
+          ],
+        });
+        res.status(200).send({
+          message: `Explore Expenses TimeLine ${timeline_content} Query`,
+          access: true,
+        });
+      } else {
+        var g_year = new Date(`${from}`).getFullYear();
+        var l_year = new Date(`${to}`).getFullYear();
+        var g_day = new Date(`${from}`).getDate();
+        var l_day = new Date(`${to}`).getDate();
+        var g_month = new Date(`${from}`).getMonth() + 1;
+        if (g_month < 10) {
+          g_month = `0${g_month}`;
+        }
+        if (g_day < 10) {
+          g_day = `0${g_day}`;
+        }
+        var l_month = new Date(`${to}`).getMonth() + 1;
+        if (l_month < 10) {
+          l_month = `0${l_month}`;
+        }
+        if (l_day < 10) {
+          l_day = `0${l_day}`;
+        }
+        const g_date = new Date(`${g_year}-${g_month}-${g_day}T00:00:00.000Z`);
+        const l_date = new Date(`${l_year}-${l_month}-${l_day}T00:00:00.000Z`);
+        var order = await OrderPayment.find({
+          $and: [
+            {
+              created_at: {
+                $gte: g_date,
+                $lte: l_date,
+              },
+            },
+            {
+              payment_to_end_user_id: `${id}`,
+            },
+            {
+              payment_module_type: "Expense",
+            },
+          ],
+        });
+        res.status(200).send({
+          message: "Explore Expenses From To Query",
+          access: true,
+          order,
+        });
+      }
+    } else if (tab_flow === "BY_INCOMES") {
+      if (valid_timeline) {
+        const g_date = new Date(`${g_year}-${g_month}-01T00:00:00.000Z`);
+        const l_date = new Date(`${l_year}-${l_month}-01T00:00:00.000Z`);
+        var order = await OrderPayment.find({
+          $and: [
+            {
+              created_at: {
+                $gte: g_date,
+                $lte: l_date,
+              },
+            },
+            {
+              payment_to_end_user_id: `${id}`,
+            },
+            {
+              payment_module_type: "Income",
+            },
+          ],
+        });
+        res.status(200).send({
+          message: `Explore Incomes TimeLine ${timeline_content} Query`,
+          access: true,
+        });
+      } else {
+        var g_year = new Date(`${from}`).getFullYear();
+        var l_year = new Date(`${to}`).getFullYear();
+        var g_day = new Date(`${from}`).getDate();
+        var l_day = new Date(`${to}`).getDate();
+        var g_month = new Date(`${from}`).getMonth() + 1;
+        if (g_month < 10) {
+          g_month = `0${g_month}`;
+        }
+        var l_month = new Date(`${to}`).getMonth() + 1;
+        if (l_month < 10) {
+          l_month = `0${l_month}`;
+        }
+        if (g_day < 10) {
+          g_day = `0${g_day}`;
+        }
+        if (l_day < 10) {
+          l_day = `0${l_day}`;
+        }
+        const g_date = new Date(`${g_year}-${g_month}-${g_day}T00:00:00.000Z`);
+        const l_date = new Date(`${l_year}-${l_month}-${l_day}T00:00:00.000Z`);
+        var order = await OrderPayment.find({
+          $and: [
+            {
+              created_at: {
+                $gte: g_date,
+                $lte: l_date,
+              },
+            },
+            {
+              payment_to_end_user_id: `${id}`,
+            },
+            {
+              payment_module_type: "Income",
+            },
+          ],
+        });
+        res.status(200).send({
+          message: "Explore Incomes Date From To Query",
+          access: true,
+        });
+      }
+    } else {
+      res.status(200).send({ message: "Invalid Flow", access: false });
+    }
     if (order?.length > 0) {
       var trans_list = [];
       order = order?.filter((val) => {
         if (val?.payment_amount > 0) return val;
       });
-      order = order?.filter((val) => {
-        if(val?.fee_receipt?.fee_payment_mode === "Government/Scholarship") return val
-      })
       order.sort(function (st1, st2) {
         return (
           parseInt(st1?.payment_invoice_number) -
@@ -1092,12 +1266,9 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
           var user = await User.findById({
             _id: ref?.payment_by_end_user_id,
           }).select("userLegalName");
-          var qvipleId = await QvipleId.findOne({ user: user?._id })
         }
         trans_list.push({
-          QvipleId: qvipleId?.qviple_id,
-          ReceiptNumber: ref?.payment_invoice_number ?? "#NA",
-          ReceiptDate: ref?.created_at ?? "#NA",
+          InvoiceNumber: ref?.payment_invoice_number ?? "#NA",
           Name: user?.userLegalName
             ? user?.userLegalName
             : ref?.payment_by_end_user_id_name,
@@ -4645,6 +4816,175 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
     console.log(e)
   }
 }
+exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      timeline,
+      timeline_content,
+      from,
+      to
+    } = req.query;
+    if (!id)
+      return res.status(200).send({
+        message: "Their is a bug need to fixed immediatley",
+        access: false,
+      });
+
+    var valid_timeline = timeline === "false" ? false : true;
+    var g_year;
+    var l_year;
+    var g_month;
+    var l_month;
+
+    if (timeline_content === "Past Week") {
+      const week = custom_date_time_reverse(7);
+      var g_year = new Date(`${week}`).getFullYear();
+      var l_year = new Date().getFullYear();
+      var g_month = new Date(`${week}`).getMonth() + 1;
+      if (g_month < 10) {
+        g_month = `0${g_month}`;
+      }
+      var l_month = new Date().getMonth() + 1;
+      if (l_month < 10) {
+        l_month = `0${l_month}`;
+      }
+    } else if (timeline_content === "Past Month") {
+      const week = custom_month_reverse(1);
+      var g_year = new Date(`${week}`).getFullYear();
+      var l_year = new Date().getFullYear();
+      var g_month = new Date(`${week}`).getMonth() + 1;
+      if (g_month < 10) {
+        g_month = `0${g_month}`;
+      }
+      var l_month = new Date().getMonth() + 1;
+      if (l_month < 10) {
+        l_month = `0${l_month}`;
+      }
+    } else if (timeline_content === "Past Year") {
+      const week = custom_year_reverse(1);
+      var g_year = new Date(`${week}`).getFullYear();
+      var l_year = new Date().getFullYear();
+      var g_month = new Date(`${week}`).getMonth() + 1;
+      if (g_month < 10) {
+        g_month = `0${g_month}`;
+      }
+      var l_month = new Date().getMonth() + 1;
+      if (l_month < 10) {
+        l_month = `0${l_month}`;
+      }
+    }
+      if (valid_timeline) {
+        const g_date = new Date(`${g_year}-${g_month}-01T00:00:00.000Z`);
+        const l_date = new Date(`${l_year}-${l_month}-01T00:00:00.000Z`);
+        var order = await OrderPayment.find({
+          $and: [
+            {
+              created_at: {
+                $gte: g_date,
+                $lte: l_date,
+              },
+            },
+            {
+              payment_to_end_user_id: `${id}`,
+            },
+          ],
+        })
+        .populate({
+          path: "fee_receipt"
+        })
+        res.status(200).send({
+          message: `Explore TimeLine ${timeline_content} Query`,
+          access: true,
+        });
+      } else {
+        var g_year = new Date(`${from}`).getFullYear();
+        var l_year = new Date(`${to}`).getFullYear();
+        var g_day = new Date(`${from}`).getDate();
+        var l_day = new Date(`${to}`).getDate();
+        var g_month = new Date(`${from}`).getMonth() + 1;
+        if (g_month < 10) {
+          g_month = `0${g_month}`;
+        }
+        var l_month = new Date(`${to}`).getMonth() + 1;
+        if (l_month < 10) {
+          l_month = `0${l_month}`;
+        }
+        if (g_day < 10) {
+          g_day = `0${g_day}`;
+        }
+        if (l_day < 10) {
+          l_day = `0${l_day}`;
+        }
+        const g_date = new Date(`${g_year}-${g_month}-${g_day}T00:00:00.000Z`);
+        const l_date = new Date(`${l_year}-${l_month}-${l_day}T00:00:00.000Z`);
+        var order = await OrderPayment.find({
+          $and: [
+            {
+              created_at: {
+                $gte: g_date,
+                $lte: l_date,
+              },
+            },
+            {
+              payment_to_end_user_id: `${id}`,
+            },
+          ],
+        })
+        .populate({
+          path: "fee_receipt"
+        })
+        res.status(200).send({
+          message: "Explore Date From To Query",
+          access: true,
+          order,
+        });
+      }
+    if (order?.length > 0) {
+      var trans_list = [];
+      order = order?.filter((val) => {
+        if (val?.payment_amount > 0) return val;
+      });
+      order = order?.filter((val) => {
+        if(val?.fee_receipt?.fee_payment_mode === "Government/Scholarship") return val
+      })
+      order.sort(function (st1, st2) {
+        return (
+          parseInt(st1?.payment_invoice_number) -
+          parseInt(st2?.payment_invoice_number)
+        );
+      });
+
+      for (var ref of order) {
+        if (ref?.payment_by_end_user_id) {
+          var user = await User.findById({
+            _id: ref?.payment_by_end_user_id,
+          }).select("userLegalName");
+          var qvipleId = await QvipleId.findOne({ user: user?._id })
+        }
+        trans_list.push({
+          QvipleId: qvipleId?.qviple_id,
+          ReceiptNumber: ref?.payment_invoice_number ?? "#NA",
+          ReceiptDate: ref?.created_at ?? "#NA",
+          Name: user?.userLegalName
+            ? user?.userLegalName
+            : ref?.payment_by_end_user_id_name,
+          PaymentAmount: ref?.payment_amount ?? "#NA",
+          PaymentType: ref?.payment_module_type ?? "#NA",
+          PaymentMode:
+            ref?.payment_mode === "By Bank" && ref?.razorpay_signature
+              ? "Payment Gateway"
+              : ref?.payment_mode ?? "#NA",
+          PaymentStatus: ref?.payment_status ?? "#NA",
+          PaymentDate: moment(ref?.created_at).format("LL") ?? "#NA",
+        });
+      }
+      await transaction_json_to_excel_query(trans_list, tab_flow, timeline, id);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 exports.renderTallyPriceQuery = async (req, res) => {
   // try {
