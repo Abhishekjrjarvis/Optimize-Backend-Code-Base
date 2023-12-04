@@ -44,6 +44,7 @@ const invokeSpecificRegister = require("../../Firebase/specific");
 const BankAccount = require("../../models/Finance/BankAccount");
 const Admin = require("../../models/superAdmin");
 const encryptionPayload = require("../../Utilities/Encrypt/payload");
+const QvipleId = require("../../models/Universal/QvipleId");
 
 var trendingQuery = (trends, cat, type, page) => {
   if (cat !== "" && page === 1) {
@@ -4816,7 +4817,7 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
     console.log(e)
   }
 }
-exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
+exports.renderFinanceScholarTransactionHistoryQuery = async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -4893,6 +4894,10 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
         .populate({
           path: "fee_receipt"
         })
+        .populate({
+          path: "student",
+          select: "studentFirstName studentMiddleName studentLastName valid_full_name studentGender"
+        })
         res.status(200).send({
           message: `Explore TimeLine ${timeline_content} Query`,
           access: true,
@@ -4934,6 +4939,10 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
         .populate({
           path: "fee_receipt"
         })
+        .populate({
+          path: "student",
+          select: "studentFirstName studentMiddleName studentLastName valid_full_name studentGender"
+        })
         res.status(200).send({
           message: "Explore Date From To Query",
           access: true,
@@ -4970,16 +4979,14 @@ exports.renderFinanceTransactionHistoryQuery = async (req, res) => {
             ? user?.userLegalName
             : ref?.payment_by_end_user_id_name,
           PaymentAmount: ref?.payment_amount ?? "#NA",
+          Gender: ref?.student?.studentGender,
           PaymentType: ref?.payment_module_type ?? "#NA",
-          PaymentMode:
-            ref?.payment_mode === "By Bank" && ref?.razorpay_signature
-              ? "Payment Gateway"
-              : ref?.payment_mode ?? "#NA",
+          PaymentMode: ref?.fee_receipt?.fee_payment_mode,
           PaymentStatus: ref?.payment_status ?? "#NA",
           PaymentDate: moment(ref?.created_at).format("LL") ?? "#NA",
         });
       }
-      await transaction_json_to_excel_query(trans_list, tab_flow, timeline, id);
+      await transaction_json_to_excel_query(trans_list, "Scholarship", timeline, id);
     }
   } catch (e) {
     console.log(e);

@@ -147,4 +147,9 @@ router.get(
   catchAsync(Filter.renderOverallStudentFeesStatisticsQuery)
 );
 
+router.get(
+  "/scholar/data/history/:id/query",
+  catchAsync(Filter.renderFinanceScholarTransactionHistoryQuery)
+);
+
 module.exports = router;
