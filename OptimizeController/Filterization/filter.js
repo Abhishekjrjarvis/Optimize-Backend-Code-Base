@@ -3755,7 +3755,7 @@ exports.renderStudentStatisticsQuery = async(req, res) => {
     var excel_list = []
     for(var val of classes){
       var all_student = await Student.find({ studentClass: val?._id })
-      .select("studentGender studentCastCategory studentCast studentReligion student student_ph studentGRNO studentROLLNO valid_full_name")
+      .select("studentGender studentCastCategory studentCast studentReligion student student_ph studentGRNO studentROLLNO valid_full_name studentProfilePhoto photoId")
       var general_m = 0
       var general_f = 0
       var obc_m = 0

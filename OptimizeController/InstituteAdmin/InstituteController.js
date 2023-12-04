@@ -4822,7 +4822,7 @@ exports.retrieveApproveCatalogArray = async (req, res) => {
       )
       .populate({
         path: "ApproveStudent",
-        select: "leave",
+        select: "leave student_prn_enroll_number",
         populate: {
           path: "leave",
           match: {
