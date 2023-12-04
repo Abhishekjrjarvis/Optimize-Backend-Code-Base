@@ -638,7 +638,14 @@ const financeSchema = new mongoose.Schema(
     mismatch_excel_count: {
       type: Number,
       default: 0
-    }
+    },
+    total_fees_arr: [],
+    total_collect_arr: [],
+    total_pending_arr: [],
+    collect_by_student_arr: [],
+    pending_by_student_arr: [],
+    collect_by_government_arr: [],
+    pending_from_government_arr: [],
   },
   { timestamps: true }
 );

@@ -4248,13 +4248,6 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
     var expenses = 0
     var total_deposits = 0
     var excess_fees = 0
-    var total_fees_arr = []
-    var total_collect_arr = []
-    var total_pending_arr = []
-    var collect_by_student_arr = []
-    var pending_by_student_arr = []
-    var collect_by_government_arr = []
-    var pending_from_government_arr = []
     var incomes_arr = []
     var expenses_arr = []
     var total_deposits_arr = []
@@ -4275,6 +4268,13 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
       finance.expenses = 0
       finance.total_deposits = 0
       finance.excess_fees = 0
+      finance.total_fees_arr = []
+      finance.total_collect_arr = []
+      finance.total_pending_arr = []
+      finance.collect_by_student_arr = []
+      finance.pending_by_student_arr = []
+      finance.collect_by_government_arr = []
+      finance.pending_from_government_arr = []
 
       finance.fees_statistics_filter.batch_level = []
       finance.fees_statistics_filter.batch_all = ""
@@ -4680,7 +4680,14 @@ exports.renderOverallStudentFeesStatisticsQuery = async(req, res) => {
       expenses: one_finance?.expenses,
       total_deposits: one_finance?.total_deposits ?? 0,
       excess_fees: one_finance?.excess_fees ?? 0,
-      fees_statistics_filter: one_finance?.fees_statistics_filter
+      fees_statistics_filter: one_finance?.fees_statistics_filter,
+      total_fees_arr: one_finance?.total_fees_arr,
+      total_collect_arr: one_finance?.total_collect_arr,
+      total_pending_arr: one_finance?.total_pending_arr,
+      collect_by_student_arr: one_finance?.collect_by_student_arr,
+      pending_by_student_arr: one_finance?.pending_by_student_arr,
+      collect_by_government_arr: one_finance?.collect_by_government_arr,
+      pending_from_government_arr: one_finance?.pending_from_government_arr,
     }
 
     const fetch_encrypt = await encryptionPayload(fetch_obj)
