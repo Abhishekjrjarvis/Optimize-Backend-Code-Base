@@ -4223,6 +4223,13 @@ exports.renderStudentStatisticsExcelQuery = async (req, res) => {
   }
 };
 
+const remove_duplicated = (arr) => {
+  jsonObject = arr.map(JSON.stringify);
+  uniqueSet = new Set(jsonObject);
+  uniqueArray = Array.from(uniqueSet).map(JSON.parse);
+  return uniqueArray
+}
+
 exports.renderStudentFeesStatisticsQuery = async(req, res) => {
   try{
     const { fid } = req?.params
@@ -4248,6 +4255,13 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
     var expenses = 0
     var total_deposits = 0
     var excess_fees = 0
+    var total_fees_arr = []
+    var total_collect_arr = []
+    var total_pending_arr = []
+    var collect_by_student_arr = []
+    var pending_by_student_arr = []
+    var collect_by_government_arr = []
+    var pending_from_government_arr = []
     var incomes_arr = []
     var expenses_arr = []
     var total_deposits_arr = []
@@ -4311,7 +4325,35 @@ exports.renderStudentFeesStatisticsQuery = async(req, res) => {
                   finance.pending_by_student += ele?.admissionRemainFeeCount ?? 0
                   finance.collect_by_government += ele?.paid_by_government
                   finance.pending_from_government += ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees
+                  if(ele?.fee_structure?.total_admission_fees + ref?.studentRemainingFeeCount > 0){
+                    total_fees_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_fee + ref?.studentPaidFeeCount > 0){
+                    total_collect_arr.push(ele?.student)
+                  }
+                  if(ele?.remaining_fee + ref?.studentRemainingFeeCount > 0){
+                    total_pending_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_student > 0){
+                    collect_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.admissionRemainFeeCount > 0){
+                    pending_by_student_arr.push(ele?.student)
+                  }
+                  if(ele?.paid_by_government > 0){
+                    collect_by_government_arr.push(ele?.student)
+                  }
+                  if(ele?.fee_structure?.total_admission_fees - ele?.fee_structure?.applicable_fees > 0){
+                    pending_from_government_arr.push(ele?.student)
+                  }
                 }
+                finance.total_fees_arr = remove_duplicated()
+                finance.total_collect_arr = remove_duplicated()
+                finance.total_pending_arr = remove_duplicated()
+                finance.collect_by_student_arr = remove_duplicated()
+                finance.pending_by_student_arr = remove_duplicated()
+                finance.collect_by_government_arr = remove_duplicated()
+                finance.pending_from_government_arr = remove_duplicated()
               }
             }
           }
